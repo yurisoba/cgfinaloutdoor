@@ -1,5 +1,5 @@
 #include "MyOrbitControl.h"
-#include <glm\gtx\quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 #include <iostream>
 

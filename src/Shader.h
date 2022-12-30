@@ -4,7 +4,7 @@
 #include <string>
 #include <sstream>
 
-#include <glad/glad.h>
+#include <GL/glew.h>
 
 // version: 221030
 

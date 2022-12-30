@@ -58,10 +58,10 @@ void main() {
 		// get UNIQUE buffer location for assigning the instance data
 		// it also updates instanceCount
 
-		unsigned int type = unsigned int(rawInstanceProps[idx].position.w);
-		unsigned int offset = commands[type].baseInstance;
+		uint type = uint(rawInstanceProps[idx].position.w);
+		uint offset = commands[type].baseInstance;
 		//if (idx >= 155304 && idx < 155304 + 1010) {
-		const unsigned int UNIQUE_IDX = atomicAdd(commands[type].instanceCount, 1);
+		const uint UNIQUE_IDX = atomicAdd(commands[type].instanceCount, 1);
 		// put data into valid-instance buffer
 
 		//currValidInstanceProps[offset + UNIQUE_IDX].position = rawInstanceProps[idx].position; //注意這邊有改成position

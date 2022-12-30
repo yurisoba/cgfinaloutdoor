@@ -1,7 +1,7 @@
 #pragma once
 
 #include <fstream>
-#include <glm\mat4x4.hpp>
+#include <glm/mat4x4.hpp>
 
 class MyTerrainData
 {
@@ -97,7 +97,7 @@ public:
 	}
 
 public:
-	glm::vec3 MyTerrainData::worldVToHeightMapUV(float x, float z) const {
+	glm::vec3 worldVToHeightMapUV(float x, float z) const {
 		glm::vec4 uv = this->m_worldVtoElevationUVMat * glm::vec4(x, 0, z, 1.0);
 		for (int i = 0; i < 3; i += 2) {
 			float n = uv[i];

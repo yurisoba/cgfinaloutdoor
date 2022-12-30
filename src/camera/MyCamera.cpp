@@ -1,5 +1,5 @@
 #include "MyCamera.h"
-#include <glm\gtx\quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 namespace INANOA {
 

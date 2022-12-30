@@ -1,5 +1,5 @@
 #include "MyCameraManager.h"
-#include <glm\gtc\matrix_transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace INANOA {
 MyCameraManager::MyCameraManager() : MIN_PLAYER_CAMERA_TERRAIN_OFFSET(5.0), MIN_AIRPLANE_TERRAIN_OFFSET(3.0)

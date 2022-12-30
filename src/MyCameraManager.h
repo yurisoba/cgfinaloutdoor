@@ -1,6 +1,6 @@
 #pragma once
 
-#include "camera\MyOrbitControl.h"
+#include "camera/MyOrbitControl.h"
 
 enum class RenderWidgetKeyCode {
 	KEY_W, KEY_A, KEY_S, KEY_D, KEY_T, KEY_Z, KEY_X

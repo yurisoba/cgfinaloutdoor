@@ -1,11 +1,11 @@
-#include "src\Shader.h"
-#include "src\SceneRenderer.h"
-#include <GLFW\glfw3.h>
-#include "src\MyImGuiPanel.h"
+#include "src/Shader.h"
+#include "src/SceneRenderer.h"
+#include <GLFW/glfw3.h>
+#include "src/MyImGuiPanel.h"
 
-#include "src\ViewFrustumSceneObject.h"
-#include "src\terrain\MyTerrain.h"
-#include "src\MyCameraManager.h"
+#include "src/ViewFrustumSceneObject.h"
+#include "src/terrain/MyTerrain.h"
+#include "src/MyCameraManager.h"
 
 #pragma comment (lib, "lib-vc2015\\glfw3.lib")
 #pragma comment(lib, "assimp-vc141-mt.lib")
@@ -18,7 +18,9 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
-#include "src\MyPoissonSample.h"
+#include "src/MyPoissonSample.h"
+
+#include <GL/glew.h>
 
 #include <glm/gtx/quaternion.hpp>
 
@@ -400,12 +402,7 @@ int main(){
 	}
 	glfwMakeContextCurrent(window);
 
-	// load OpenGL function pointer
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-	{
-		std::cout << "Failed to initialize GLAD" << std::endl;
-		return -1;
-	}
+	glewInit();
 
 	glfwSetKeyCallback(window, keyCallback);
 	glfwSetScrollCallback(window, mouseScrollCallback);
@@ -1086,12 +1083,12 @@ bool initializeGL(){
 	// initialize shader program
 	// vertex shader
 	Shader* vsShader = new Shader(GL_VERTEX_SHADER);
-	vsShader->createShaderFromFile("src\\shader\\oglVertexShader.glsl");
+	vsShader->createShaderFromFile("src/shader/oglVertexShader.glsl");
 	std::cout << vsShader->shaderInfoLog() << "\n";
 
 	// fragment shader
 	Shader* fsShader = new Shader(GL_FRAGMENT_SHADER);
-	fsShader->createShaderFromFile("src\\shader\\oglFragmentShader.glsl");
+	fsShader->createShaderFromFile("src/shader/oglFragmentShader.glsl");
 	std::cout << fsShader->shaderInfoLog() << "\n";
 
 	// shader program
@@ -1112,11 +1109,11 @@ bool initializeGL(){
 	delete fsShader;
 
 	auto* defVsShader = new Shader(GL_VERTEX_SHADER);
-	defVsShader->createShaderFromFile("src\\shader\\def_vert.glsl");
+	defVsShader->createShaderFromFile("src/shader/def_vert.glsl");
 	std::cout << defVsShader->shaderInfoLog() << std::endl;
 
 	auto* defFsShader = new Shader(GL_FRAGMENT_SHADER);
-	defFsShader->createShaderFromFile("src\\shader\\def_frag.glsl");
+	defFsShader->createShaderFromFile("src/shader/def_frag.glsl");
 	std::cout << defFsShader->shaderInfoLog() << std::endl;
 
 	defShaderProgram = new ShaderProgram();
@@ -1138,7 +1135,7 @@ bool initializeGL(){
 	//reset Compute shader
 
 	Shader* reset_cs_shader = new Shader(GL_COMPUTE_SHADER);
-	reset_cs_shader->createShaderFromFile("src\\shader\\reset_cs_shader.glsl");
+	reset_cs_shader->createShaderFromFile("src/shader/reset_cs_shader.glsl");
 	std::cout << reset_cs_shader->shaderInfoLog() << "\n";
 
 	reset_cs_shader_program = new ShaderProgram();
@@ -1156,7 +1153,7 @@ bool initializeGL(){
 
 	//culling Compute shader
 	Shader* culling_cs_shader = new Shader(GL_COMPUTE_SHADER);
-	culling_cs_shader->createShaderFromFile("src\\shader\\culling_cs_shader.glsl");
+	culling_cs_shader->createShaderFromFile("src/shader/culling_cs_shader.glsl");
 	std::cout << culling_cs_shader->shaderInfoLog() << "\n";
 
 	culling_cs_shader_program = new ShaderProgram();

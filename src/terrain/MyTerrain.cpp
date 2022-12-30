@@ -1,7 +1,7 @@
 #include "MyTerrain.h"
-#include <glm\gtx\quaternion.hpp>
-#include <glm\mat4x4.hpp>
-#include <glm\gtx\transform.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <glm/mat4x4.hpp>
+#include <glm/gtx/transform.hpp>
 
 
 MyTerrain::MyTerrain() : m_numChunk(4)
@@ -23,8 +23,8 @@ TerrainSceneObject* MyTerrain::sceneObject() {
 }
 
 void MyTerrain::init(const float chunkSize){
-	MyTerrainData* mtd = MyTerrainData::fromMYTD("assets\\elevationMap_2.mytd");
-	mtd->loadChunkDataFromFile("assets\\terrain.chunkdata");
+	MyTerrainData* mtd = MyTerrainData::fromMYTD("assets/elevationMap_2.mytd");
+	mtd->loadChunkDataFromFile("assets/terrain.chunkdata");
 	this->setupTerrainSceneObject(this->m_numChunk, 512, mtd->m_chunkVertices, mtd->m_numChunkVertex, mtd->m_chunkIndices, mtd->m_numChunkIndex, mtd);
 
 	this->m_terrainData = mtd;

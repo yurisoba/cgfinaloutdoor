@@ -4,7 +4,7 @@
 #include "Shader.h"
 #include "SceneManager.h"
 #include "DynamicSceneObject.h"
-#include "terrain\TerrainSceneObject.h"
+#include "terrain/TerrainSceneObject.h"
 
 
 class SceneRenderer
