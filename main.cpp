@@ -103,10 +103,7 @@ struct RawInstanceProperties {
 	vec4 position;
 	vec4 boundSphere; //前三個存圓心座標，第四個存半徑
 
-	vec4 matCol0;
-	vec4 matCol1;
-	vec4 matCol2;
-	vec4 matCol3;
+	mat4 rotationMatrix;
 };
 
 GLuint grass_building_vao;
@@ -786,12 +783,9 @@ void initGrassBuilding() {
 		mat4 rotationMatrix = toMat4(q);
 		//vec3 pos = vec3(POSITION_BUFFER0[i * 3 + 0], POSITION_BUFFER0[i * 3 + 1], POSITION_BUFFER0[i * 3 + 2]);
 		//transformMatrix = glm::translate(transformMatrix, pos);
-
-		rawInsData[i].matCol0 = rotationMatrix[0];
-		rawInsData[i].matCol1 = rotationMatrix[1];
-		rawInsData[i].matCol2 = rotationMatrix[2];
-		rawInsData[i].matCol3 = rotationMatrix[3];
-
+		
+		rawInsData[i].rotationMatrix = rotationMatrix;
+		
 		
 	}
 	for (j = 0; j < NUM_SAMPLE1; j++) {
@@ -806,10 +800,7 @@ void initGrassBuilding() {
 		//vec3 pos = vec3(POSITION_BUFFER0[i * 3 + 0], POSITION_BUFFER0[i * 3 + 1], POSITION_BUFFER0[i * 3 + 2]);
 		//transformMatrix = glm::translate(transformMatrix, pos);
 
-		rawInsData[j + NUM_SAMPLE0].matCol0 = rotationMatrix[0];
-		rawInsData[j + NUM_SAMPLE0].matCol1 = rotationMatrix[1];
-		rawInsData[j + NUM_SAMPLE0].matCol2 = rotationMatrix[2];
-		rawInsData[j + NUM_SAMPLE0].matCol3 = rotationMatrix[3];
+		rawInsData[j + NUM_SAMPLE0].rotationMatrix = rotationMatrix;
 	}
 	for (k = 0; k < NUM_SAMPLE2; k++) {
 		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1].position = vec4(POSITION_BUFFER2[k * 3 + 0], POSITION_BUFFER2[k * 3 + 1], POSITION_BUFFER2[k * 3 + 2],
@@ -823,10 +814,7 @@ void initGrassBuilding() {
 		//vec3 pos = vec3(POSITION_BUFFER0[i * 3 + 0], POSITION_BUFFER0[i * 3 + 1], POSITION_BUFFER0[i * 3 + 2]);
 		//transformMatrix = glm::translate(transformMatrix, pos);
 
-		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1].matCol0 = rotationMatrix[0];
-		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1].matCol1 = rotationMatrix[1];
-		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1].matCol2 = rotationMatrix[2];
-		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1].matCol3 = rotationMatrix[3];
+		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1].rotationMatrix = rotationMatrix;
 	}
 	for (k = 0; k < NUM_SAMPLE3; k++) {
 		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1 + NUM_SAMPLE2].position = vec4(POSITION_BUFFER3[k * 3 + 0], POSITION_BUFFER3[k * 3 + 1], POSITION_BUFFER3[k * 3 + 2],
@@ -840,10 +828,15 @@ void initGrassBuilding() {
 		//vec3 pos = vec3(POSITION_BUFFER0[i * 3 + 0], POSITION_BUFFER0[i * 3 + 1], POSITION_BUFFER0[i * 3 + 2]);
 		//transformMatrix = glm::translate(transformMatrix, pos);
 
-		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1 + NUM_SAMPLE2].matCol0 = rotationMatrix[0];
-		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1 + NUM_SAMPLE2].matCol1 = rotationMatrix[1];
-		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1 + NUM_SAMPLE2].matCol2 = rotationMatrix[2];
-		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1 + NUM_SAMPLE2].matCol3 = rotationMatrix[3];
+		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1 + NUM_SAMPLE2].rotationMatrix = rotationMatrix;
+		
+		for (int i = 0; i < 4; i++) {
+			for (int j = 0; j < 4; j++) {
+				cout << rotationMatrix[i][j] << ' ';
+			}
+			cout << "\n";
+		}
+		cout << "\n";
 	}
 	for (k = 0; k < NUM_SAMPLE4; k++) {
 		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1 + NUM_SAMPLE2 + NUM_SAMPLE3].position = vec4(POSITION_BUFFER4[k * 3 + 0], POSITION_BUFFER4[k * 3 + 1], POSITION_BUFFER4[k * 3 + 2],
@@ -857,10 +850,7 @@ void initGrassBuilding() {
 		//vec3 pos = vec3(POSITION_BUFFER0[i * 3 + 0], POSITION_BUFFER0[i * 3 + 1], POSITION_BUFFER0[i * 3 + 2]);
 		//transformMatrix = glm::translate(transformMatrix, pos);
 
-		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1 + NUM_SAMPLE2 + NUM_SAMPLE3].matCol0 = rotationMatrix[0];
-		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1 + NUM_SAMPLE2 + NUM_SAMPLE3].matCol1 = rotationMatrix[1];
-		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1 + NUM_SAMPLE2 + NUM_SAMPLE3].matCol2 = rotationMatrix[2];
-		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1 + NUM_SAMPLE2 + NUM_SAMPLE3].matCol3 = rotationMatrix[3];
+		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1 + NUM_SAMPLE2 + NUM_SAMPLE3].rotationMatrix = rotationMatrix;
 	}
 	// prepare a SSBO for storing raw instance data
 	GLuint rawInstanceDataBufferHandle;
@@ -972,6 +962,7 @@ void renderGrassBuilding() {
 
 
 	glUniform1i(SceneManager::Instance()->m_fs_pixelProcessIdHandle, 12);
+	glUniform1i(SceneManager::Instance()->m_vs_vertexProcessIdHandle, 12);
 	shaderProgram->useProgram();
 
 	glBindVertexArray(grass_building_vao);

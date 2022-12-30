@@ -9,10 +9,7 @@ struct RawInstanceProperties {
 	vec4 position;
 	vec4 boundSphere;
 
-	vec4 matCol0;
-	vec4 matCol1;
-	vec4 matCol2;
-	vec4 matCol3;
+	mat4 rotationMatrix;
 };
 
 layout(std430, binding = 1) buffer InstanceData {
@@ -70,18 +67,17 @@ void commonProcess(){//­n§ïªº
 }
 
 void grass_building_process() {
-	mat4 rotationMatrix = mat4(
-		rawInstanceProps[int(v_worldPosOffset.w)].matCol0,
-		rawInstanceProps[int(v_worldPosOffset.w)].matCol1,
-		rawInstanceProps[int(v_worldPosOffset.w)].matCol2,
-		rawInstanceProps[int(v_worldPosOffset.w)].matCol3
-	);
+	mat4 rotationMatrix = rawInstanceProps[int(v_worldPosOffset.w)].rotationMatrix;
+	//mat4 rotationMatrix = rawInstanceProps[gl_InstanceID].rotationMatrix;
+	//mat4 rotationMatrix = mat4(vec4(0, 0, -1, 0), vec4(0, 1, 0, 0), vec4(1, 0, 0, 0), vec4(0, 0, 0, 1));
 
-	vec4 worldVertex = rotationMatrix * modelMat * vec4(v_vertex + v_worldPosOffset.xyz, 1.0);
-	vec4 worldNormal = rotationMatrix * modelMat * vec4(v_normal, 0.0);
+	vec4 v = rotationMatrix * vec4(v_vertex, 1.0);
 
-	vec4 viewVertex = viewMat * worldVertex;
-	vec4 viewNormal = viewMat * worldNormal;
+	vec4 worldVertex =  modelMat * vec4(v.xyz + v_worldPosOffset.xyz, 1.0) ;
+	vec4 worldNormal = modelMat * vec4(v_normal, 0.0) ;
+
+	vec4 viewVertex = viewMat  * worldVertex;
+	vec4 viewNormal = viewMat  * worldNormal;
 
 	f_viewVertex = viewVertex.xyz;
 	f_uv = v_uv;
@@ -133,6 +129,7 @@ void main(){
 	else if (vertexProcessIdx == 10) { //draw airplane
 		blinnPhong();
 		commonProcess();
+		//grass_building_process();
 	}
 	else if (vertexProcessIdx == 11) { //draw rock
 		blinnPhong();
@@ -143,6 +140,6 @@ void main(){
 		grass_building_process();
 	}
 	else{
-		commonProcess() ;
+		grass_building_process();
 	}	
 }

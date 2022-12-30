@@ -16,10 +16,7 @@ struct RawInstanceProperties {
 	vec4 position; 
 	vec4 boundSphere;
 
-	vec4 matCol0;
-	vec4 matCol1;
-	vec4 matCol2;
-	vec4 matCol3;
+	mat4 rotationMatrix;
 };
 struct InstanceProperties {
 	vec4 position;
