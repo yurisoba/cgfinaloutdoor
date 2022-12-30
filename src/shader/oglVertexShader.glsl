@@ -3,7 +3,21 @@
 layout(location=0) in vec3 v_vertex;
 layout(location=1) in vec3 v_normal ;
 layout(location=2) in vec3 v_uv ;
-layout(location = 3) in vec4 v_worldPosOffset;
+layout(location = 3) in vec4 v_worldPosOffset; //要改成idx
+
+struct RawInstanceProperties {
+	vec4 position;
+	vec4 boundSphere;
+
+	vec4 matCol0;
+	vec4 matCol1;
+	vec4 matCol2;
+	vec4 matCol3;
+};
+
+layout(std430, binding = 1) buffer InstanceData {
+	RawInstanceProperties rawInstanceProps[];
+};
 
 out vec3 f_viewVertex ;
 out vec3 f_uv ;
@@ -13,6 +27,8 @@ out VS_OUT{
 	vec3 L;
 	vec3 V;
 }vs_out;
+
+
 
 layout(location = 0) uniform mat4 modelMat ;
 layout(location = 7) uniform mat4 viewMat ;
@@ -43,6 +59,26 @@ void commonProcess(){//要改的
 
 	vec4 worldVertex = modelMat * vec4(v_vertex + v_worldPosOffset.xyz, 1.0);
 	vec4 worldNormal = modelMat * vec4(v_normal, 0.0);
+
+	vec4 viewVertex = viewMat * worldVertex;
+	vec4 viewNormal = viewMat * worldNormal;
+
+	f_viewVertex = viewVertex.xyz;
+	f_uv = v_uv;
+
+	gl_Position = projMat * viewVertex;
+}
+
+void grass_building_process() {
+	mat4 rotationMatrix = mat4(
+		rawInstanceProps[int(v_worldPosOffset.w)].matCol0,
+		rawInstanceProps[int(v_worldPosOffset.w)].matCol1,
+		rawInstanceProps[int(v_worldPosOffset.w)].matCol2,
+		rawInstanceProps[int(v_worldPosOffset.w)].matCol3
+	);
+
+	vec4 worldVertex = rotationMatrix * modelMat * vec4(v_vertex + v_worldPosOffset.xyz, 1.0);
+	vec4 worldNormal = rotationMatrix * modelMat * vec4(v_normal, 0.0);
 
 	vec4 viewVertex = viewMat * worldVertex;
 	vec4 viewNormal = viewMat * worldNormal;
@@ -104,7 +140,7 @@ void main(){
 	}
 	else if (vertexProcessIdx == 12) { //draw grass and building
 		blinnPhong();
-		commonProcess();
+		grass_building_process();
 	}
 	else{
 		commonProcess() ;

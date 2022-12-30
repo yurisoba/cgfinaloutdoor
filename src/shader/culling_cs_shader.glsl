@@ -14,8 +14,12 @@ layout(std430, binding = 3) buffer DrawCommandsBlock {
 
 struct RawInstanceProperties {
 	vec4 position; 
-	vec4 radians;
-	vec4 flag; 
+	vec4 boundSphere;
+
+	vec4 matCol0;
+	vec4 matCol1;
+	vec4 matCol2;
+	vec4 matCol3;
 };
 struct InstanceProperties {
 	vec4 position;
@@ -36,13 +40,17 @@ layout(location = 7) uniform mat4 viewProjMat; //player view projection
 
 
 void main() {
-	const uint idx = gl_GlobalInvocationID.x;
+	uint idx = gl_GlobalInvocationID.x;
 	// discarding invalid array-access
 	if (idx >= numMaxInstance) {
 		return;
 	}
 
+	//這邊好像一樣只要判斷position就好
 	// translate the position to clip space
+	//mat4 modelMat = mat4(rawInstanceProps[idx].matCol0, rawInstanceProps[idx].matCol1,
+	//	rawInstanceProps[idx].matCol2, rawInstanceProps[idx].matCol3);
+
 	vec4 clipSpaceV = viewProjMat * vec4(rawInstanceProps[idx].position.xyz, 1.0);
 	clipSpaceV = clipSpaceV / clipSpaceV.w;
 	// determine if it is culled
@@ -60,8 +68,10 @@ void main() {
 		const unsigned int UNIQUE_IDX = atomicAdd(commands[type].instanceCount, 1);
 		// put data into valid-instance buffer
 
-		currValidInstanceProps[offset + UNIQUE_IDX].position = rawInstanceProps[idx].position; //注意這邊有改成position
-
+		//currValidInstanceProps[offset + UNIQUE_IDX].position = rawInstanceProps[idx].position; //注意這邊有改成position
+		currValidInstanceProps[offset + UNIQUE_IDX].position.xyz = rawInstanceProps[idx].position.xyz; //改成只要存那個東西的idx就好
+		float idx_float = float(idx);
+		currValidInstanceProps[offset + UNIQUE_IDX].position.w = idx_float;
 	}
 
 }

@@ -20,6 +20,8 @@
 
 #include "src\MyPoissonSample.h"
 
+#include <glm/gtx/quaternion.hpp>
+
 using namespace std;
 using namespace glm;
 
@@ -96,13 +98,15 @@ struct InstanceProperties {
 	vec4 position;
 	//vec4 radians;
 	//int flag;
-	//ivec4 indices;
 };
 struct RawInstanceProperties {
 	vec4 position;
-	vec4 radians;
-	vec4 flag;
-	//ivec4 indices;
+	vec4 boundSphere; //前三個存圓心座標，第四個存半徑
+
+	vec4 matCol0;
+	vec4 matCol1;
+	vec4 matCol2;
+	vec4 matCol3;
 };
 
 GLuint grass_building_vao;
@@ -774,47 +778,89 @@ void initGrassBuilding() {
 	for (i = 0; i < NUM_SAMPLE0; i++) {
 		rawInsData[i].position = vec4(POSITION_BUFFER0[i * 3 + 0], POSITION_BUFFER0[i * 3 + 1], POSITION_BUFFER0[i * 3 + 2],
 			0.0);
+		rawInsData[i].boundSphere = vec4(0.0, 0.66, 0.0, 1.4);
+		
+		//計算好transform model，再把transform model存進rawInsData
+		vec3 rad = vec3(RADIANS_BUFFER0[i * 3 + 0], RADIANS_BUFFER0[i * 3 + 1], RADIANS_BUFFER0[i * 3 + 2]);
+		quat q = quat(rad);
+		mat4 rotationMatrix = toMat4(q);
+		//vec3 pos = vec3(POSITION_BUFFER0[i * 3 + 0], POSITION_BUFFER0[i * 3 + 1], POSITION_BUFFER0[i * 3 + 2]);
+		//transformMatrix = glm::translate(transformMatrix, pos);
 
-		rawInsData[i].radians = vec4(RADIANS_BUFFER0[i * 3 + 0], RADIANS_BUFFER0[i * 3 + 1], RADIANS_BUFFER0[i * 3 + 2],
-			0.0);
+		rawInsData[i].matCol0 = rotationMatrix[0];
+		rawInsData[i].matCol1 = rotationMatrix[1];
+		rawInsData[i].matCol2 = rotationMatrix[2];
+		rawInsData[i].matCol3 = rotationMatrix[3];
 
-		rawInsData[i].flag = vec4(0.0, 0.0, 0.0, 0.0);
+		
 	}
 	for (j = 0; j < NUM_SAMPLE1; j++) {
 		rawInsData[j + NUM_SAMPLE0].position = vec4(POSITION_BUFFER1[j * 3 + 0], POSITION_BUFFER1[j * 3 + 1], POSITION_BUFFER1[j * 3 + 2],
 			1.0);
 		
-		rawInsData[j + NUM_SAMPLE0].radians = vec4(RADIANS_BUFFER1[j * 3 + 0], RADIANS_BUFFER1[j * 3 + 1], RADIANS_BUFFER1[j * 3 + 2],
-			0.0);
+		rawInsData[j + NUM_SAMPLE0].boundSphere = vec4(0.0, 2.55, 0.0, 3.4);
 
-		rawInsData[j + NUM_SAMPLE0].flag = vec4(0.0, 0.0, 0.0, 0.0);
+		vec3 rad = vec3(RADIANS_BUFFER1[j * 3 + 0], RADIANS_BUFFER1[j * 3 + 1], RADIANS_BUFFER1[j * 3 + 2]);
+		quat q = quat(rad);
+		mat4 rotationMatrix = toMat4(q);
+		//vec3 pos = vec3(POSITION_BUFFER0[i * 3 + 0], POSITION_BUFFER0[i * 3 + 1], POSITION_BUFFER0[i * 3 + 2]);
+		//transformMatrix = glm::translate(transformMatrix, pos);
+
+		rawInsData[j + NUM_SAMPLE0].matCol0 = rotationMatrix[0];
+		rawInsData[j + NUM_SAMPLE0].matCol1 = rotationMatrix[1];
+		rawInsData[j + NUM_SAMPLE0].matCol2 = rotationMatrix[2];
+		rawInsData[j + NUM_SAMPLE0].matCol3 = rotationMatrix[3];
 	}
 	for (k = 0; k < NUM_SAMPLE2; k++) {
 		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1].position = vec4(POSITION_BUFFER2[k * 3 + 0], POSITION_BUFFER2[k * 3 + 1], POSITION_BUFFER2[k * 3 + 2],
 			2.0);
-		
-		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1].radians = vec4(RADIANS_BUFFER2[k * 3 + 0], RADIANS_BUFFER2[k * 3 + 1], RADIANS_BUFFER2[k * 3 + 2],
-			0.0);
 
-		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1].flag = vec4(0.0, 0.0, 0.0, 0.0);
+		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1].boundSphere = vec4(0.0, 1.76, 0.0, 2.6);
+
+		vec3 rad = vec3(RADIANS_BUFFER2[k * 3 + 0], RADIANS_BUFFER2[k * 3 + 1], RADIANS_BUFFER2[k * 3 + 2]);
+		quat q = quat(rad);
+		mat4 rotationMatrix = toMat4(q);
+		//vec3 pos = vec3(POSITION_BUFFER0[i * 3 + 0], POSITION_BUFFER0[i * 3 + 1], POSITION_BUFFER0[i * 3 + 2]);
+		//transformMatrix = glm::translate(transformMatrix, pos);
+
+		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1].matCol0 = rotationMatrix[0];
+		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1].matCol1 = rotationMatrix[1];
+		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1].matCol2 = rotationMatrix[2];
+		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1].matCol3 = rotationMatrix[3];
 	}
 	for (k = 0; k < NUM_SAMPLE3; k++) {
 		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1 + NUM_SAMPLE2].position = vec4(POSITION_BUFFER3[k * 3 + 0], POSITION_BUFFER3[k * 3 + 1], POSITION_BUFFER3[k * 3 + 2],
 			3.0);
 		
-		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1 + NUM_SAMPLE2].radians = vec4(RADIANS_BUFFER3[k * 3 + 0], RADIANS_BUFFER3[k * 3 + 1], RADIANS_BUFFER3[k * 3 + 2],
-			0.0);
+		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1 + NUM_SAMPLE2].boundSphere = vec4(0.0, 4.57, 0.0, 8.5);
 
-		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1 + NUM_SAMPLE2].flag = vec4(0.0, 0.0, 0.0, 0.0);
+		vec3 rad = vec3(RADIANS_BUFFER3[k * 3 + 0], RADIANS_BUFFER3[k * 3 + 1], RADIANS_BUFFER3[k * 3 + 2]);
+		quat q = quat(rad);
+		mat4 rotationMatrix = toMat4(q);
+		//vec3 pos = vec3(POSITION_BUFFER0[i * 3 + 0], POSITION_BUFFER0[i * 3 + 1], POSITION_BUFFER0[i * 3 + 2]);
+		//transformMatrix = glm::translate(transformMatrix, pos);
+
+		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1 + NUM_SAMPLE2].matCol0 = rotationMatrix[0];
+		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1 + NUM_SAMPLE2].matCol1 = rotationMatrix[1];
+		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1 + NUM_SAMPLE2].matCol2 = rotationMatrix[2];
+		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1 + NUM_SAMPLE2].matCol3 = rotationMatrix[3];
 	}
 	for (k = 0; k < NUM_SAMPLE4; k++) {
 		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1 + NUM_SAMPLE2 + NUM_SAMPLE3].position = vec4(POSITION_BUFFER4[k * 3 + 0], POSITION_BUFFER4[k * 3 + 1], POSITION_BUFFER4[k * 3 + 2],
 			4.0);
-		
-		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1 + NUM_SAMPLE2 + NUM_SAMPLE3].radians = vec4(RADIANS_BUFFER4[k * 3 + 0], RADIANS_BUFFER4[k * 3 + 1], RADIANS_BUFFER4[k * 3 + 2],
-			0.0);
 
-		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1 + NUM_SAMPLE2 + NUM_SAMPLE3].flag = vec4(0.0, 0.0, 0.0, 0.0);
+		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1 + NUM_SAMPLE2 + NUM_SAMPLE3].boundSphere = vec4(0.0, 4.57, 0.0, 10.2);
+	
+		vec3 rad = vec3(RADIANS_BUFFER4[k * 3 + 0], RADIANS_BUFFER4[k * 3 + 1], RADIANS_BUFFER4[k * 3 + 2]);
+		quat q = quat(rad);
+		mat4 rotationMatrix = toMat4(q);
+		//vec3 pos = vec3(POSITION_BUFFER0[i * 3 + 0], POSITION_BUFFER0[i * 3 + 1], POSITION_BUFFER0[i * 3 + 2]);
+		//transformMatrix = glm::translate(transformMatrix, pos);
+
+		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1 + NUM_SAMPLE2 + NUM_SAMPLE3].matCol0 = rotationMatrix[0];
+		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1 + NUM_SAMPLE2 + NUM_SAMPLE3].matCol1 = rotationMatrix[1];
+		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1 + NUM_SAMPLE2 + NUM_SAMPLE3].matCol2 = rotationMatrix[2];
+		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1 + NUM_SAMPLE2 + NUM_SAMPLE3].matCol3 = rotationMatrix[3];
 	}
 	// prepare a SSBO for storing raw instance data
 	GLuint rawInstanceDataBufferHandle;
@@ -828,7 +874,7 @@ void initGrassBuilding() {
 	GLuint validInstanceDataBufferHandle;
 	glGenBuffers(1, &validInstanceDataBufferHandle);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, validInstanceDataBufferHandle);
-	glBufferStorage(GL_SHADER_STORAGE_BUFFER, NUM_TOTAL_INSTANCE * sizeof(RawInstanceProperties), nullptr, GL_MAP_READ_BIT);
+	glBufferStorage(GL_SHADER_STORAGE_BUFFER, NUM_TOTAL_INSTANCE * sizeof(InstanceProperties), nullptr, GL_MAP_READ_BIT);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, validInstanceDataBufferHandle);
 
 	// prepare a SSBO for storing draw commands
