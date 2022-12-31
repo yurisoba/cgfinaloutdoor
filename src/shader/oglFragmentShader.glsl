@@ -7,6 +7,8 @@ layout (location = 0) out vec4 fragColor ;
 layout(location = 2) uniform int pixelProcessId;
 layout(location = 4) uniform sampler2D albedoTexture;
 
+layout(binding = 10) uniform sampler2D airplane_texture;
+layout(binding = 11) uniform sampler2D rockTexture;
 layout(binding = 24) uniform sampler2DArray albedoTextureArray;
 
 //blinn phong shading
@@ -14,7 +16,6 @@ vec4 la = vec4(0.2, 0.2, 0.2, 1.0);
 vec4 ld = vec4(0.64, 0.64, 0.64, 1.0);
 vec4 ls = vec4(0.16, 0.16, 0.16, 1.0);
 
-uniform sampler2D airplane_texture;
 
 
 in VS_OUT
@@ -79,10 +80,7 @@ void main(){
 		terrainPass() ;
 	}
 	else if (pixelProcessId == 10) { //draw airplane
-		//vec4 texel = texture(airplane_texture, f_uv.xy);
-		//fragColor = texel;
-		//fragColor = vec4(1.0, 0.0, 0.0, 1.0);
-		vec4 texel = vec4(1.0, 0.0, 0.0, 1.0);
+		vec4 texel = texture(airplane_texture, f_uv.xy);
 		vec3 ka = texel.xyz;
 		vec3 kd = texel.xyz;
 		vec3 ks = vec3(1.0, 1.0, 1.0);
@@ -91,10 +89,7 @@ void main(){
 		fragColor = blinnPhong(texel, ka, kd, ks, shininess); //texel改成用texture取來就會是正常的blinn phong
 	}
 	else if (pixelProcessId == 11) { //draw rock
-		//vec4 texel = texture(airplane_texture, f_uv.xy);
-		//fragColor = texel;
-		//fragColor = vec4(1.0, 0.0, 0.0, 1.0);
-		vec4 texel = vec4(1.0, 0.0, 0.0, 1.0);
+		vec4 texel = texture(rockTexture, f_uv.xy);
 		vec3 ka = texel.xyz;
 		vec3 kd = texel.xyz;
 		vec3 ks = vec3(1.0, 1.0, 1.0);

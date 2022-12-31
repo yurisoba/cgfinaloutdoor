@@ -145,6 +145,21 @@ texture_data loadImg(const char* path)
 	return texture;
 }
 
+texture_data loadImg(const char* path, bool flip)
+{
+	texture_data texture;
+	int n;
+	stbi_set_flip_vertically_on_load(flip);
+	stbi_uc* data = stbi_load(path, &texture.width, &texture.height, &n, 4);
+	if (data != NULL)
+	{
+		texture.data = new unsigned char[texture.width * texture.height * 4 * sizeof(unsigned char)];
+		memcpy(texture.data, data, texture.width * texture.height * 4 * sizeof(unsigned char));
+		stbi_image_free(data);
+	}
+	return texture;
+}
+
 void updateWhenPlayerProjectionChanged(const float nearDepth, const float farDepth);
 void viewFrustumMultiClipCorner(const std::vector<float> &depths, const glm::mat4 &viewMat, const glm::mat4 &projMat, float *clipCorner);
 
@@ -244,11 +259,11 @@ private:
 
 		//const aiScene* scene = aiImportFile(path.c_str(), aiProcessPreset_TargetRealtime_MaxQuality);
 
-		//if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
-		//{
-		//	cout << "ERROR::ASSIMP::" << import.GetErrorString() << endl;
-		//	return;
-		//}
+		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+		{
+			auto e = std::string("ERROR ASSIMP ") + import.GetErrorString();
+			throw std::runtime_error(e);
+		}
 		directory = path.substr(0, path.find_last_of('/'));
 
 		processNode(scene->mRootNode, scene);
@@ -496,9 +511,8 @@ void initAirplane() {
 
 
 	//texture
-	texture_data tdata = loadImg("assets/Airplane_smooth_DefaultMaterial_BaseMap.jpg");
+	texture_data tdata = loadImg("assets/Airplane_smooth_DefaultMaterial_BaseMap.jpg", false);
 	glGenTextures(1, &airplane_texture);
-	glActiveTexture(GL_TEXTURE10);
 	glBindTexture(GL_TEXTURE_2D, airplane_texture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, tdata.width, tdata.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tdata.data);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -565,7 +579,7 @@ void initRock() {
 
 
 	//texture
-	texture_data tdata = loadImg("assets/MagicRock/StylMagicRocks_AlbedoTransparency.png");
+	texture_data tdata = loadImg("assets/MagicRock/StylMagicRocks_AlbedoTransparency.png", false);
 	glGenTextures(1, &rock_texture);
 	glActiveTexture(GL_TEXTURE11);
 	glBindTexture(GL_TEXTURE_2D, rock_texture);
