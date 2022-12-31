@@ -116,6 +116,9 @@ void terrainProcess(){
 	f_viewVertex = viewVertex.xyz;
 	f_uv = uv.xyz ;
 
+	vs_out.N = normalTex.rgb;
+	vs_out.V = -viewVertex.xyz;
+
 	gl_Position = projMat * viewVertex ;
 }
 

@@ -81,6 +81,7 @@ GLuint rock_texture;
 ShaderProgram* reset_cs_shader_program;
 ShaderProgram* culling_cs_shader_program;
 ShaderProgram* shaderProgram;
+ShaderProgram* defShaderProgram;
 
 GLuint          NUM_TOTAL_INSTANCE_LOCATION;
 int             NUM_TOTAL_INSTANCE;
@@ -1011,6 +1012,66 @@ void activeComputeShader(mat4 view_projection_matrix) {
 	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
 
+GLuint gbuf, gbuf_tex[4], final_vao;
+void reinitFB() {
+	glBindFramebuffer(GL_FRAMEBUFFER, gbuf);
+
+	glGenTextures(4, gbuf_tex);
+	glBindTexture(GL_TEXTURE_2D, gbuf_tex[0]);
+	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, FRAME_WIDTH, FRAME_HEIGHT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	glBindTexture(GL_TEXTURE_2D, gbuf_tex[1]);
+	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, FRAME_WIDTH, FRAME_HEIGHT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	glBindTexture(GL_TEXTURE_2D, gbuf_tex[2]);
+	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, FRAME_WIDTH, FRAME_HEIGHT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	glBindTexture(GL_TEXTURE_2D, gbuf_tex[3]);
+	glTexStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH_COMPONENT32F, FRAME_WIDTH, FRAME_HEIGHT);
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gbuf_tex[0], 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gbuf_tex[1], 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gbuf_tex[2], 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, gbuf_tex[3], 0);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void initFB() {
+	glGenFramebuffers(1, &gbuf);
+
+	reinitFB();
+
+	glGenVertexArrays(1, &final_vao);
+	glBindVertexArray(final_vao);
+
+	const GLfloat wvtx[16] = {
+		-1.0f, -1.0f,
+		  0.0f, 0.0f,
+		-1.0f, 1.0f,
+		  0.0f, 1.0f,
+		1.0f, -1.0f,
+		  1.0f, 0.0f,
+		1.0f, 1.0f,
+		  1.0f, 1.0f,
+	};
+
+	GLuint buf;
+	glGenBuffers(1, &buf);
+	glBindBuffer(GL_ARRAY_BUFFER, buf);
+	glBufferData(GL_ARRAY_BUFFER, 16 * sizeof(GLfloat), wvtx, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, 0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, (const GLvoid*)(sizeof(GLfloat) * 2));
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+}
+
 unsigned int features = 1;
 
 bool initializeGL(){
@@ -1019,6 +1080,8 @@ bool initializeGL(){
 	initRock();
 	initGrassBuilding();
 	initTexture();
+
+	initFB();
 
 	// initialize shader program
 	// vertex shader
@@ -1047,6 +1110,30 @@ bool initializeGL(){
 	
 	delete vsShader;
 	delete fsShader;
+
+	auto* defVsShader = new Shader(GL_VERTEX_SHADER);
+	defVsShader->createShaderFromFile("src\\shader\\def_vert.glsl");
+	std::cout << defVsShader->shaderInfoLog() << std::endl;
+
+	auto* defFsShader = new Shader(GL_FRAGMENT_SHADER);
+	defFsShader->createShaderFromFile("src\\shader\\def_frag.glsl");
+	std::cout << defFsShader->shaderInfoLog() << std::endl;
+
+	defShaderProgram = new ShaderProgram();
+	defShaderProgram->init();
+	defShaderProgram->attachShader(defVsShader);
+	defShaderProgram->attachShader(defFsShader);
+	defShaderProgram->checkStatus();
+	if (defShaderProgram->status() != ShaderProgramStatus::READY) {
+		return false;
+	}
+	defShaderProgram->linkProgram();
+
+	defVsShader->releaseShader();
+	defFsShader->releaseShader();
+
+	delete defVsShader;
+	delete defFsShader;
 
 	//reset Compute shader
 
@@ -1094,7 +1181,7 @@ bool initializeGL(){
 	model_location = glGetUniformLocation(shaderProgram->programId(), "modelMat");
 	view_location = glGetUniformLocation(shaderProgram->programId(), "viewMat");
 	proj_location = glGetUniformLocation(shaderProgram->programId(), "projMat");
-	features_loc = glGetUniformLocation(shaderProgram->programId(), "features");
+	features_loc = glGetUniformLocation(defShaderProgram->programId(), "features");
 	// =================================================================
 	// init renderer
 	defaultRenderer = new SceneRenderer();
@@ -1188,10 +1275,20 @@ void paintGL(){
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
-	
+
 	// start new frame
 	defaultRenderer->setViewport(0, 0, FRAME_WIDTH, FRAME_HEIGHT);
 	defaultRenderer->startNewFrame();
+
+	const GLenum dbufs[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gbuf);
+	glDrawBuffers(3, dbufs);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	const GLfloat white[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	glClearBufferfv(GL_COLOR, 0, white);
+	glClearBufferfv(GL_COLOR, 1, white);
+	glClearBufferfv(GL_COLOR, 2, white);
+	glClearBufferfv(GL_DEPTH, 0, white);
 
 	// rendering with player view		
 	defaultRenderer->setViewport(playerViewport[0], playerViewport[1], playerViewport[2], playerViewport[3]);
@@ -1199,7 +1296,6 @@ void paintGL(){
 	defaultRenderer->setProjection(playerProjMat);
 	defaultRenderer->renderPass();
 
-	glUniform1ui(features_loc, features);
 	renderAirplane(airplaneModelMat);
 	renderRock();
 
@@ -1211,13 +1307,26 @@ void paintGL(){
 	defaultRenderer->setProjection(godProjMat);
 	defaultRenderer->renderPass();
 
-	glUniform1ui(features_loc, features);
-
 	renderAirplane(airplaneModelMat);
 	renderRock();
 
 	renderGrassBuilding();
 	// ===============================
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	defShaderProgram->useProgram();
+	glUniform1ui(features_loc, features);
+	glViewport(0, 0, FRAME_WIDTH, FRAME_HEIGHT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(1.0, 1.0, 1.0, 1.0);
+	glBindVertexArray(final_vao);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, gbuf_tex[0]);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, gbuf_tex[1]);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, gbuf_tex[2]);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
 	ImGui::Begin("My name is window");
 	m_imguiPanel->update();
@@ -1311,7 +1420,7 @@ void resize(const int w, const int h) {
 	FRAME_WIDTH = w;
 	FRAME_HEIGHT = h;
 
-
+	reinitFB();
 
 	m_myCameraManager->resize(w, h);
 	defaultRenderer->resize(w, h);

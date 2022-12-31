@@ -178,5 +178,11 @@
     <None Include="src\shader\culling_cs_shader.glsl">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="src\shader\def_frag.glsl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="src\shader\def_vert.glsl">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
