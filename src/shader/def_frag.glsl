@@ -55,4 +55,14 @@ void main(void)
 
 	if (FEAT(0))
 		blinnPhong();
+
+	if (FEAT(13))		// ws_vtx
+		fragColor = vec4(texelFetch(g_pos, ivec2(gl_FragCoord.xy), 0).rgb * 0.5 + 0.5, 1.0);
+	if (FEAT(14))		// normal
+		fragColor = vec4(texelFetch(g_nom, ivec2(gl_FragCoord.xy), 0).rgb * 0.5 + 0.5, 1.0);
+	if (FEAT(15)) {		// specular
+		vec4 kss = ksss[uint(texelFetch(g_pos, ivec2(gl_FragCoord.xy), 0).w)];
+		fragColor = vec4(normalize(kss.rgb) * 0.5 + 0.5, 1.0);
+	}
+
 }

@@ -1331,6 +1331,18 @@ void paintGL(){
 	ImGui::Begin("My name is window");
 	m_imguiPanel->update();
 
+	if (ImGui::Button("SHADED"))
+		features = (1 << 0);
+	ImGui::SameLine(0, 1.0);
+	if (ImGui::Button("WORLDSPACE"))
+		features = (1 << 13);
+	ImGui::SameLine(0, 1.0);
+	if (ImGui::Button("NORMAL"))
+		features = (1 << 14);
+	ImGui::SameLine(0, 1.0);
+	if (ImGui::Button("SPECULAR"))
+		features = (1 << 15);
+
 	featureUI("Blinn-Phong", 0);
 
 	ImGui::End();
