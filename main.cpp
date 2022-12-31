@@ -596,22 +596,22 @@ void renderRock() {
 	glDrawElements(GL_TRIANGLES, rock_idx, GL_UNSIGNED_INT, 0);
 }
 
+
+
 void initTexture() {
-	int NUM_TEXTURE = 4; //貼圖數量
+	int NUM_TEXTURE = 5; //貼圖數量
 
 	texture_data tex0 = loadImg("assets/grassB_albedo.png");
 	texture_data tex1 = loadImg("assets/bush01.png");
 	texture_data tex2 = loadImg("assets/bush05.png");
-	//texture_data tex3 = loadImg("assets/Airplane_smooth_DefaultMaterial_BaseMap.jpg");
-	//uchar* textureArrayData = new uchar * [IMG_WIDTH * IMG_HEIGHT * IMG_CHANNEL * NUM_TEXTURE];
-	// merge the textures to the texture array data
+    texture_data tex3 = loadImg("assets/Medieval_Building_LowPoly/Medieval_Building_LowPoly_V2_Albedo_small.png");
+    texture_data tex4 = loadImg("assets/Medieval_Building_LowPoly/Medieval_Building_LowPoly_V1_Albedo_small.png");
 
 	// create texture array
 	glGenTextures(1, &textureArrayHandle);
 	glBindTexture(GL_TEXTURE_2D_ARRAY, textureArrayHandle);
 	// the internal format for glTexStorageXD must be "Sized Internal Formats"
 	glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA32F, tex0.width, tex0.height, NUM_TEXTURE);
-
 
 	glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, tex0.width, tex0.height, 1, GL_RGBA,
 		GL_UNSIGNED_BYTE, tex0.data);
@@ -622,8 +622,11 @@ void initTexture() {
 	glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 2, tex2.width, tex2.height, 1, GL_RGBA,
 		GL_UNSIGNED_BYTE, tex2.data);
 
-	//glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 3, tex3.width, tex3.height, 1, GL_RGBA,
-	//	GL_UNSIGNED_BYTE, tex3.data);
+	glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 3, tex3.width, tex3.height, 1, GL_RGBA,
+		GL_UNSIGNED_BYTE, tex3.data);
+
+	glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 4, tex3.width, tex3.height, 1, GL_RGBA,
+		GL_UNSIGNED_BYTE, tex4.data);
 
 	glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -954,12 +957,9 @@ void renderGrassBuilding() {
 	mat4 Identy_Init(1.0);
 	model_matrix = Identy_Init;
 	glUniformMatrix4fv(model_location, 1, GL_FALSE, &model_matrix[0][0]);
-	//glUniformMatrix4fv(test_model_location, 1, GL_FALSE, &model_matrix[0][0]);
 
-
-	//glActiveTexture(GL_TEXTURE1);
-	//glBindTexture(GL_TEXTURE_2D_ARRAY, textureArrayHandle);
-
+    glActiveTexture(GL_TEXTURE0 + 24);
+	glBindTexture(GL_TEXTURE_2D_ARRAY, textureArrayHandle);
 
 	glUniform1i(SceneManager::Instance()->m_fs_pixelProcessIdHandle, 12);
 	glUniform1i(SceneManager::Instance()->m_vs_vertexProcessIdHandle, 12);
@@ -975,6 +975,7 @@ void renderGrassBuilding() {
 	//glDrawElements(GL_TRIANGLES, (indices.size()), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 
+        glActiveTexture(GL_TEXTURE0);
 }
 
 void activeComputeShader(mat4 view_projection_matrix) {
@@ -1000,6 +1001,7 @@ bool initializeGL(){
 	initAirplane();
 	initRock();
 	initGrassBuilding();
+	initTexture();
 
 	// initialize shader program
 	// vertex shader
@@ -1167,6 +1169,7 @@ void paintGL(){
 	renderRock();
 
 	renderGrassBuilding();
+
 	// rendering with god view
 	defaultRenderer->setViewport(godViewport[0], godViewport[1], godViewport[2], godViewport[3]);
 	defaultRenderer->setView(godVM);
@@ -1232,6 +1235,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 	else if (key == GLFW_KEY_1) { m_myCameraManager->teleport(1); }
 	else if (key == GLFW_KEY_2) { m_myCameraManager->teleport(2); }
 
+	else if (key == GLFW_KEY_ESCAPE) { glfwSetWindowShouldClose(window, true); }
 }
 void mouseScrollCallback(GLFWwindow *window, double xoffset, double yoffset) {}
 

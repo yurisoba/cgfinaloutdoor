@@ -4,9 +4,10 @@ in vec3 f_viewVertex ;
 in vec3 f_uv ;
 
 layout (location = 0) out vec4 fragColor ;
-
 layout(location = 2) uniform int pixelProcessId;
-layout(location = 4) uniform sampler2D albedoTexture ;
+layout(location = 4) uniform sampler2D albedoTexture;
+
+layout(binding = 24) uniform sampler2DArray albedoTextureArray;
 
 //blinn phong shading
 vec4 la = vec4(0.2, 0.2, 0.2, 1.0);
@@ -15,7 +16,6 @@ vec4 ls = vec4(0.16, 0.16, 0.16, 1.0);
 
 uniform sampler2D airplane_texture;
 
-uniform sampler2DArray albedoTextureArray;
 
 in VS_OUT
 {
@@ -103,7 +103,9 @@ void main(){
 		fragColor = blinnPhong(texel, ka, kd, ks, shininess); // texel改成用texture取來就會是正常的blinn phong
 	}
 	else if (pixelProcessId == 12) { //draw grass and building
-		vec4 texel = vec4(1.0, 0.0, 0.0, 1.0);
+        vec4 texel = texture(albedoTextureArray, f_uv);
+		if (texel.a < 0.3)
+			discard;
 		vec3 ka = texel.xyz;
 		vec3 kd = texel.xyz;
 		vec3 ks = vec3(0.0, 0.0, 0.0);

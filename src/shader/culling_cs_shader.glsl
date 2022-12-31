@@ -54,7 +54,6 @@ void main() {
 	bool frustumCulled = (clipSpaceV.x < -1.0) || (clipSpaceV.x > 1.0) || (clipSpaceV.y < -1.0) ||
 		(clipSpaceV.y > 1.0) || (clipSpaceV.z < -1.0) || (clipSpaceV.z > 1.0);
 
-
 	if (frustumCulled == false) {
 		// get UNIQUE buffer location for assigning the instance data
 		// it also updates instanceCount
