@@ -11,12 +11,17 @@ layout(binding = 10) uniform sampler2D airplane_texture;
 layout(binding = 11) uniform sampler2D rockTexture;
 layout(binding = 24) uniform sampler2DArray albedoTextureArray;
 
+uniform uint features;
+
 //blinn phong shading
 vec4 la = vec4(0.2, 0.2, 0.2, 1.0);
 vec4 ld = vec4(0.64, 0.64, 0.64, 1.0);
 vec4 ls = vec4(0.16, 0.16, 0.16, 1.0);
 
-
+vec3 ka;
+vec3 kd;
+vec3 ks;
+float shininess;
 
 in VS_OUT
 {
@@ -25,7 +30,7 @@ in VS_OUT
 	vec3 V;
 } fs_in;
 
-vec4 blinnPhong(vec4 texel, vec3 ka, vec3 kd, vec3 ks, float shininess) {
+void blinnPhong() {
 	// output color
 	vec4 outColor = vec4(0.0, 0.0, 0.0, 1.0);
 	//fragColor = texel;
@@ -38,13 +43,13 @@ vec4 blinnPhong(vec4 texel, vec3 ka, vec3 kd, vec3 ks, float shininess) {
 
 	//diffuse
 	//outColor += white_Id * vec4(kd, 1.0) + max(dot(N, L), 0.0);
-	outColor += max(dot(N, L), 0.0) * texel * ld;
+	outColor += max(dot(N, L), 0.0) * fragColor * ld;
 
 	//specular
 	float spec = pow(max(dot(N, H), 0.0), shininess);
-	outColor += ls * vec4(ks, 1.0) * spec + ls * texel * spec;
+	outColor += ls * vec4(ks, 1.0) * spec + ls * fragColor * spec;
 
-	return outColor;
+	fragColor = outColor;
 }
 
 vec4 withFog(vec4 color){
@@ -72,6 +77,13 @@ void pureColor(){
 	fragColor = withFog(vec4(1.0, 0.0, 0.0, 1.0)) ;
 }
 
+#define FEAT(id) ((features & (1 << id)) != 0)
+
+void pipeline() {
+	if (FEAT(0))
+		blinnPhong();
+}
+
 void main(){	
 	if(pixelProcessId == 5){
 		pureColor() ;
@@ -81,32 +93,32 @@ void main(){
 	}
 	else if (pixelProcessId == 10) { //draw airplane
 		vec4 texel = texture(airplane_texture, f_uv.xy);
-		vec3 ka = texel.xyz;
-		vec3 kd = texel.xyz;
-		vec3 ks = vec3(1.0, 1.0, 1.0);
-		float shininess = 32.0;
-		
-		fragColor = blinnPhong(texel, ka, kd, ks, shininess); //texel改成用texture取來就會是正常的blinn phong
+		ka = texel.xyz;
+		kd = texel.xyz;
+		ks = vec3(1.0, 1.0, 1.0);
+		shininess = 32.0;
+		fragColor = texel;
+		pipeline();
 	}
 	else if (pixelProcessId == 11) { //draw rock
 		vec4 texel = texture(rockTexture, f_uv.xy);
-		vec3 ka = texel.xyz;
-		vec3 kd = texel.xyz;
-		vec3 ks = vec3(1.0, 1.0, 1.0);
-		float shininess = 32.0;
-
-		fragColor = blinnPhong(texel, ka, kd, ks, shininess); // texel改成用texture取來就會是正常的blinn phong
+		ka = texel.xyz;
+		kd = texel.xyz;
+		ks = vec3(1.0, 1.0, 1.0);
+		shininess = 32.0;
+		fragColor = texel;
+		pipeline();
 	}
 	else if (pixelProcessId == 12) { //draw grass and building
         vec4 texel = texture(albedoTextureArray, f_uv);
 		if (texel.a < 0.3)
 			discard;
-		vec3 ka = texel.xyz;
-		vec3 kd = texel.xyz;
-		vec3 ks = vec3(0.0, 0.0, 0.0);
-		float shininess = 1.0;
-
-		fragColor = blinnPhong(texel, ka, kd, ks, shininess); // texel改成用texture取來就會是正常的blinn phong
+		ka = texel.xyz;
+		kd = texel.xyz;
+		ks = vec3(0.0, 0.0, 0.0);
+		shininess = 1.0;
+		fragColor = texel;
+		pipeline();
 	}
 	else{
 		pureColor() ;
