@@ -113,6 +113,7 @@ GLuint grass_building_ebo;
 GLuint           model_location;
 GLuint           view_location;
 GLuint           proj_location;
+GLuint           features_loc;
 
 mat4 model_matrix;
 mat4 view_matrix;
@@ -1010,6 +1011,8 @@ void activeComputeShader(mat4 view_projection_matrix) {
 	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
 
+unsigned int features = 1;
+
 bool initializeGL(){
 
 	initAirplane();
@@ -1091,6 +1094,7 @@ bool initializeGL(){
 	model_location = glGetUniformLocation(shaderProgram->programId(), "modelMat");
 	view_location = glGetUniformLocation(shaderProgram->programId(), "viewMat");
 	proj_location = glGetUniformLocation(shaderProgram->programId(), "projMat");
+	features_loc = glGetUniformLocation(shaderProgram->programId(), "features");
 	// =================================================================
 	// init renderer
 	defaultRenderer = new SceneRenderer();
@@ -1121,6 +1125,22 @@ bool initializeGL(){
 }
 void resizeGL(GLFWwindow *window, int w, int h){
 	resize(w, h);
+}
+
+void featureUI(const char* name, int idx)
+{
+	bool b = (features & (1 << idx)) != 0;
+	if (ImGui::Button(name)) {
+		if (!b)
+			features |= (1 << idx);
+		else
+			features &= ~(1 << idx);
+	}
+	ImGui::SameLine(0.0f, 1.0f);
+	if (b)
+		ImGui::TextUnformatted("ON");
+	else
+		ImGui::TextUnformatted("OFF");
 }
 
 void paintGL(){
@@ -1179,6 +1199,7 @@ void paintGL(){
 	defaultRenderer->setProjection(playerProjMat);
 	defaultRenderer->renderPass();
 
+	glUniform1ui(features_loc, features);
 	renderAirplane(airplaneModelMat);
 	renderRock();
 
@@ -1190,6 +1211,8 @@ void paintGL(){
 	defaultRenderer->setProjection(godProjMat);
 	defaultRenderer->renderPass();
 
+	glUniform1ui(features_loc, features);
+
 	renderAirplane(airplaneModelMat);
 	renderRock();
 
@@ -1198,6 +1221,9 @@ void paintGL(){
 
 	ImGui::Begin("My name is window");
 	m_imguiPanel->update();
+
+	featureUI("Blinn-Phong", 0);
+
 	ImGui::End();
 
 	ImGui::Render();
