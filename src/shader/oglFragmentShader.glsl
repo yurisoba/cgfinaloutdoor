@@ -4,6 +4,8 @@ in vec3 f_viewVertex ;
 in vec3 f_uv ;
 
 layout (location = 0) out vec4 fragColor ;
+layout (location = 1) out vec4 fragNormal;
+layout (location = 2) out vec4 ws_coords;
 layout(location = 2) uniform int pixelProcessId;
 layout(location = 4) uniform sampler2D albedoTexture;
 
@@ -11,17 +13,6 @@ layout(binding = 10) uniform sampler2D airplane_texture;
 layout(binding = 11) uniform sampler2D rockTexture;
 layout(binding = 24) uniform sampler2DArray albedoTextureArray;
 
-uniform uint features;
-
-//blinn phong shading
-vec4 la = vec4(0.2, 0.2, 0.2, 1.0);
-vec4 ld = vec4(0.64, 0.64, 0.64, 1.0);
-vec4 ls = vec4(0.16, 0.16, 0.16, 1.0);
-
-vec3 ka;
-vec3 kd;
-vec3 ks;
-float shininess;
 
 in VS_OUT
 {
@@ -29,28 +20,6 @@ in VS_OUT
 	vec3 L;
 	vec3 V;
 } fs_in;
-
-void blinnPhong() {
-	// output color
-	vec4 outColor = vec4(0.0, 0.0, 0.0, 1.0);
-	//fragColor = texel;
-	vec3 N = normalize(fs_in.N);
-	vec3 L = normalize(fs_in.L);
-	vec3 V = normalize(fs_in.V);
-	vec3 H = normalize(L + V); //halfway
-	//ambient
-	outColor += la * vec4(ka, 1.0);
-
-	//diffuse
-	//outColor += white_Id * vec4(kd, 1.0) + max(dot(N, L), 0.0);
-	outColor += max(dot(N, L), 0.0) * fragColor * ld;
-
-	//specular
-	float spec = pow(max(dot(N, H), 0.0), shininess);
-	outColor += ls * vec4(ks, 1.0) * spec + ls * fragColor * spec;
-
-	fragColor = outColor;
-}
 
 vec4 withFog(vec4 color){
 	const vec4 FOG_COLOR = vec4(0.0, 0.0, 0.0, 1) ;
@@ -75,16 +44,14 @@ void terrainPass(){
 
 void pureColor(){
 	fragColor = withFog(vec4(1.0, 0.0, 0.0, 1.0)) ;
+	fragNormal = vec4(1.0);
 }
 
-#define FEAT(id) ((features & (1 << id)) != 0)
+void main(){
+    int kss_idx = 0;
 
-void pipeline() {
-	if (FEAT(0))
-		blinnPhong();
-}
+	fragNormal = vec4(normalize(fs_in.N), 0.0);
 
-void main(){	
 	if(pixelProcessId == 5){
 		pureColor() ;
 	}
@@ -93,34 +60,24 @@ void main(){
 	}
 	else if (pixelProcessId == 10) { //draw airplane
 		vec4 texel = texture(airplane_texture, f_uv.xy);
-		ka = texel.xyz;
-		kd = texel.xyz;
-		ks = vec3(1.0, 1.0, 1.0);
-		shininess = 32.0;
+		kss_idx = 1;
 		fragColor = texel;
-		pipeline();
 	}
 	else if (pixelProcessId == 11) { //draw rock
 		vec4 texel = texture(rockTexture, f_uv.xy);
-		ka = texel.xyz;
-		kd = texel.xyz;
-		ks = vec3(1.0, 1.0, 1.0);
-		shininess = 32.0;
+		kss_idx = 1;
 		fragColor = texel;
-		pipeline();
 	}
 	else if (pixelProcessId == 12) { //draw grass and building
         vec4 texel = texture(albedoTextureArray, f_uv);
 		if (texel.a < 0.3)
 			discard;
-		ka = texel.xyz;
-		kd = texel.xyz;
-		ks = vec3(0.0, 0.0, 0.0);
-		shininess = 1.0;
+		kss_idx = 2;
 		fragColor = texel;
-		pipeline();
 	}
 	else{
 		pureColor() ;
 	}
+
+	ws_coords = vec4(normalize(fs_in.V), kss_idx);
 }

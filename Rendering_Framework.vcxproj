@@ -67,6 +67,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="src\shader\culling_cs_shader.glsl" />
+    <None Include="src\shader\def_frag.glsl" />
+    <None Include="src\shader\def_vert.glsl" />
     <None Include="src\shader\oglFragmentShader.glsl" />
     <None Include="src\shader\oglVertexShader.glsl" />
     <None Include="src\shader\reset_cs_shader.glsl" />
