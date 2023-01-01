@@ -40,7 +40,6 @@ layout(location = 9) uniform mat4 terrainVToUVMat;
 //blinn phong shading
 uniform vec3 light_pos = vec3(0.4, 0.5, 0.8);
 
-
 void commonProcess(){//要改的
 	/*
 	vec4 worldVertex = modelMat * vec4(v_vertex, 1.0) ;
@@ -53,16 +52,17 @@ void commonProcess(){//要改的
 	f_uv = v_uv ;
 
 	gl_Position = projMat * viewVertex ;*/
-
 	vec4 worldVertex = modelMat * vec4(v_vertex + v_worldPosOffset.xyz, 1.0);
 	vec4 worldNormal = modelMat * vec4(v_normal, 0.0);
 
 	vec4 viewVertex = viewMat * worldVertex;
 	vec4 viewNormal = viewMat * worldNormal;
 
+	vs_out.V = worldVertex.xyz;
+	vs_out.N = worldNormal.xyz;
+
 	f_viewVertex = viewVertex.xyz;
 	f_uv = v_uv;
-
 	gl_Position = projMat * viewVertex;
 }
 
@@ -82,6 +82,9 @@ void grass_building_process() {
 	f_viewVertex = viewVertex.xyz;
 	f_uv = v_uv;
 
+	vs_out.V = worldVertex.xyz;
+	vs_out.N = worldNormal.xyz;
+
 	gl_Position = projMat * viewVertex;
 }
 
@@ -89,11 +92,9 @@ void blinnPhong() {
 	mat4 mv_matrix = viewMat * modelMat;
 	vec4 P = mv_matrix * vec4(v_vertex, 1.0);
 	
-	vs_out.N = mat3(mv_matrix) * v_normal;
+	vs_out.N = vec3(modelMat * vec4(v_normal, 1.0));
 
 	vs_out.L = light_pos - P.xyz;
-
-	vs_out.V = -P.xyz;
 }
 
 void terrainProcess(){
@@ -116,8 +117,9 @@ void terrainProcess(){
 	f_viewVertex = viewVertex.xyz;
 	f_uv = uv.xyz ;
 
+
 	vs_out.N = normalTex.rgb;
-	vs_out.V = -viewVertex.xyz;
+	vs_out.V = worldV.xyz;
 
 	gl_Position = projMat * viewVertex ;
 }

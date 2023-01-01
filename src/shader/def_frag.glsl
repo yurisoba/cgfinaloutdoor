@@ -20,17 +20,20 @@ uniform vec4 ksss[] = {
 };
 
 void blinnPhong() {
-	vec3 N = texelFetch(g_nom, ivec2(gl_FragCoord.xy), 0).rgb;
+	vec3 N = texelFetch(g_nom, ivec2(gl_FragCoord.xy), 0).rgb; // world space normal
 	vec4 gp = texelFetch(g_pos, ivec2(gl_FragCoord.xy), 0);
-	vec3 V = gp.rgb;
+	vec3 ws = gp.rgb; // world space coordinates
+	vec3 V = normalize(-ws);
 	vec3 ks = ksss[uint(gp.w)].rgb;
 	float shininess = ksss[uint(gp.w)].a;
 
 	// output color
 	vec4 outColor = vec4(0.0, 0.0, 0.0, 1.0);
 
-	vec3 L = normalize(light_pos);
+	vec3 L = light_pos - ws;
+	float dist = length(L);
 	vec3 H = normalize(L + V); //halfway
+	L = normalize(L);
 
 	//ambient
 	vec3 ka = fragColor.xyz;
@@ -57,7 +60,7 @@ void main(void)
 		blinnPhong();
 
 	if (FEAT(13))		// ws_vtx
-		fragColor = vec4(texelFetch(g_pos, ivec2(gl_FragCoord.xy), 0).rgb * 0.5 + 0.5, 1.0);
+		fragColor = vec4(normalize(texelFetch(g_pos, ivec2(gl_FragCoord.xy), 0).rgb) * 0.5 + 0.5, 1.0);
 	if (FEAT(14))		// normal
 		fragColor = vec4(texelFetch(g_nom, ivec2(gl_FragCoord.xy), 0).rgb * 0.5 + 0.5, 1.0);
 	if (FEAT(15)) {		// specular

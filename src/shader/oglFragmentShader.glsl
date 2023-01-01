@@ -79,5 +79,5 @@ void main(){
 		pureColor() ;
 	}
 
-	ws_coords = vec4(normalize(fs_in.V), kss_idx);
+	ws_coords = vec4(fs_in.V, kss_idx);
 }
