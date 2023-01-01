@@ -74,7 +74,7 @@ GLuint rock_vao;
 GLuint rock_vbo;
 GLuint rock_ebo;
 
-GLuint rock_texture;
+GLuint rock_texture, rock_normal;
 
 
 //Shader Program=======================================
@@ -114,7 +114,7 @@ GLuint grass_building_ebo;
 GLuint           model_location;
 GLuint           view_location;
 GLuint           proj_location;
-GLuint           features_loc;
+GLuint           features_loc, features_loc2;
 
 mat4 model_matrix;
 mat4 view_matrix;
@@ -186,6 +186,7 @@ public:
 	vector<Vertex> vertices; //Àx¦s³»ÂIªº°}¦C
 	vector<unsigned int> indices; //Àx¦sindexªº°}¦C
 	vector<Texture> textures; //Àx¦stextureªº°}¦C
+	vector<float> tangents;
 
 	//constructor
 	Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures)
@@ -257,7 +258,7 @@ private:
 	{
 
 		Assimp::Importer import;
-		const aiScene* scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+		const aiScene* scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
 		//const aiScene* scene = aiImportFile(path.c_str(), aiProcessPreset_TargetRealtime_MaxQuality);
 
@@ -290,6 +291,7 @@ private:
 		vector<Vertex> vertices;
 		vector<unsigned int> indices;
 		vector<Texture> textures;
+		vector<float> tangents;
 
 		//vertex
 		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
@@ -319,6 +321,9 @@ private:
 			}
 			else
 				vertex.TexCoords = vec3(0.0f, 0.0f, 0.0f);
+			tangents.push_back(mesh->mTangents[i].x);
+			tangents.push_back(mesh->mTangents[i].y);
+			tangents.push_back(mesh->mTangents[i].z);
 
 			vertices.push_back(vertex);
 		}
@@ -350,7 +355,9 @@ private:
 			//textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 		}
 
-		return Mesh(vertices, indices, textures);
+		auto M = Mesh(vertices, indices, textures);
+		M.tangents = tangents;
+		return M;
 	}
 
 	vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName)
@@ -579,6 +586,13 @@ void initRock() {
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
 	glEnableVertexAttribArray(2);
 
+	const auto& tangents = rock_mesh[0].tangents;
+	GLuint tanbuf;
+	glGenBuffers(1, &tanbuf);
+	glBindBuffer(GL_ARRAY_BUFFER, tanbuf);
+	glBufferData(GL_ARRAY_BUFFER, tangents.size() * sizeof(float), tangents.data(), GL_STATIC_DRAW);
+	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glEnableVertexAttribArray(4);
 
 	//texture
 	texture_data tdata = loadImg("assets/MagicRock/StylMagicRocks_AlbedoTransparency.png", false);
@@ -586,6 +600,15 @@ void initRock() {
 	glActiveTexture(GL_TEXTURE11);
 	glBindTexture(GL_TEXTURE_2D, rock_texture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, tdata.width, tdata.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tdata.data);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	texture_data normt = loadImg("assets/MagicRock/StylMagicRocks_NormalOpenGL.png", false);
+	glGenTextures(1, &rock_normal);
+	glBindTexture(GL_TEXTURE_2D, rock_normal);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, normt.width, normt.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, normt.data);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -607,6 +630,8 @@ void renderRock() {
 
 	glActiveTexture(GL_TEXTURE11);
 	glBindTexture(GL_TEXTURE_2D, rock_texture);
+	glActiveTexture(GL_TEXTURE12);
+	glBindTexture(GL_TEXTURE_2D, rock_normal);
 
 	glBindVertexArray(rock_vao);
 	glDrawElements(GL_TRIANGLES, rock_idx, GL_UNSIGNED_INT, 0);
@@ -1072,7 +1097,7 @@ void initFB() {
 	glEnableVertexAttribArray(1);
 }
 
-unsigned int features = 1;
+unsigned int features = (1 << 0) | (1 << 1);
 
 bool initializeGL(){
 
@@ -1181,6 +1206,7 @@ bool initializeGL(){
 	model_location = glGetUniformLocation(shaderProgram->programId(), "modelMat");
 	view_location = glGetUniformLocation(shaderProgram->programId(), "viewMat");
 	proj_location = glGetUniformLocation(shaderProgram->programId(), "projMat");
+	features_loc2 = glGetUniformLocation(shaderProgram->programId(), "features");
 	features_loc = glGetUniformLocation(defShaderProgram->programId(), "features");
 	// =================================================================
 	// init renderer
@@ -1295,7 +1321,7 @@ void paintGL(){
 	defaultRenderer->setView(playerVM);
 	defaultRenderer->setProjection(playerProjMat);
 	defaultRenderer->renderPass();
-
+	glUniform1ui(features_loc2, features);
 	renderAirplane(airplaneModelMat);
 	renderRock();
 
@@ -1344,6 +1370,7 @@ void paintGL(){
 		features = (1 << 15);
 
 	featureUI("Blinn-Phong", 0);
+	featureUI("Normal Mapping", 1);
 
 	ImGui::End();
 

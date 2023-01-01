@@ -4,6 +4,7 @@ layout(location=0) in vec3 v_vertex;
 layout(location=1) in vec3 v_normal ;
 layout(location=2) in vec3 v_uv ;
 layout(location = 3) in vec4 v_worldPosOffset; //­n§ï¦¨idx
+layout(location = 4) in vec3 v_tangent;
 
 struct RawInstanceProperties {
 	vec4 position;
@@ -23,6 +24,7 @@ out VS_OUT{
 	vec3 N;
 	vec3 L;
 	vec3 V;
+	vec3 T;
 }vs_out;
 
 
@@ -137,6 +139,7 @@ void main(){
 	else if (vertexProcessIdx == 11) { //draw rock
 		blinnPhong();
 		commonProcess();
+		vs_out.T = v_tangent;
 	}
 	else if (vertexProcessIdx == 12) { //draw grass and building
 		blinnPhong();

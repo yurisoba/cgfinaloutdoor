@@ -11,6 +11,7 @@ layout(location = 4) uniform sampler2D albedoTexture;
 
 layout(binding = 10) uniform sampler2D airplane_texture;
 layout(binding = 11) uniform sampler2D rockTexture;
+layout(binding = 12) uniform sampler2D rockNormal;
 layout(binding = 24) uniform sampler2DArray albedoTextureArray;
 
 
@@ -19,7 +20,11 @@ in VS_OUT
 	vec3 N;
 	vec3 L;
 	vec3 V;
+	vec3 T;
 } fs_in;
+
+uniform uint features;
+#define FEAT(id) ((features & (1 << id)) != 0)
 
 vec4 withFog(vec4 color){
 	const vec4 FOG_COLOR = vec4(0.0, 0.0, 0.0, 1) ;
@@ -67,6 +72,15 @@ void main(){
 		vec4 texel = texture(rockTexture, f_uv.xy);
 		kss_idx = 1;
 		fragColor = texel;
+
+		if (FEAT(1)) {
+			vec3 N = normalize(fs_in.N);
+			vec3 T = normalize(fs_in.T);
+			vec3 B = normalize(cross(N, T));
+			mat3 TBN = mat3(T, B, N);
+			vec3 nm = texture(rockNormal, f_uv.xy).xyz * 2.0 - 1.0;
+			fragNormal = vec4(normalize(TBN * normalize(nm)), 0.0);
+		}
 	}
 	else if (pixelProcessId == 12) { //draw grass and building
         vec4 texel = texture(albedoTextureArray, f_uv);
