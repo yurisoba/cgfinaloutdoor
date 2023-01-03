@@ -23,6 +23,16 @@ void blinnPhong() {
 	vec3 N = texelFetch(g_nom, ivec2(gl_FragCoord.xy), 0).rgb; // world space normal
 	vec4 gp = texelFetch(g_pos, ivec2(gl_FragCoord.xy), 0);
 	vec3 ws = gp.rgb; // world space coordinates
+	vec3 L = light_pos;
+
+	/*
+	N = (viewMat * vec4(N, 0.0)).rgb;
+	ws = (viewMat * vec4(ws, 1.0)).rgb;
+	L = (viewMat * vec4(L, 1.0)).rgb;
+	N = normalize(N);
+	*/
+
+
 	vec3 V = normalize(-ws);
 	vec3 ks = ksss[uint(gp.w)].rgb;
 	float shininess = ksss[uint(gp.w)].a;
@@ -30,9 +40,8 @@ void blinnPhong() {
 	// output color
 	vec4 outColor = vec4(0.0, 0.0, 0.0, 1.0);
 
-	vec3 L = light_pos - ws;
 	float dist = length(L);
-	vec3 H = normalize(L + V); //halfway
+	vec3 H = (normalize(L) + V); //halfway
 	L = normalize(L);
 
 	//ambient
@@ -58,6 +67,8 @@ void main(void)
 
 	if (FEAT(0))
 		blinnPhong();
+
+	fragColor = vec4(pow(fragColor.rgb, vec3(0.5)), fragColor.a);
 
 	if (FEAT(13))		// ws_vtx
 		fragColor = vec4(normalize(texelFetch(g_pos, ivec2(gl_FragCoord.xy), 0).rgb) * 0.5 + 0.5, 1.0);
