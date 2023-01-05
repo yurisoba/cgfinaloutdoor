@@ -49,11 +49,14 @@ void main() {
 	//mat4 modelMat = mat4(rawInstanceProps[idx].matCol0, rawInstanceProps[idx].matCol1,
 	//	rawInstanceProps[idx].matCol2, rawInstanceProps[idx].matCol3);
 
-	vec4 clipSpaceV = viewProjMat * vec4(rawInstanceProps[idx].position.xyz, 1.0);
+	vec4 clipSpaceV = viewProjMat * vec4(rawInstanceProps[idx].position.xyz +
+		rawInstanceProps[idx].boundSphere.xyz, 1.0);
+	float dist = rawInstanceProps[idx].boundSphere.w / clipSpaceV.w;
 	clipSpaceV = clipSpaceV / clipSpaceV.w;
 	// determine if it is culled
-	bool frustumCulled = (clipSpaceV.x < -1.0) || (clipSpaceV.x > 1.0) || (clipSpaceV.y < -1.0) ||
-		(clipSpaceV.y > 1.0) || (clipSpaceV.z < -1.0) || (clipSpaceV.z > 1.0);
+	bool frustumCulled = (clipSpaceV.x + dist  < -1.0) || (clipSpaceV.x - dist > 1.0) || 
+		(clipSpaceV.y + dist < -1.0) || (clipSpaceV.y - dist > 1.0) ||
+		(clipSpaceV.z + dist < -1.0) || (clipSpaceV.z - dist > 1.0);
 
 	if (frustumCulled == false) {
 		// get UNIQUE buffer location for assigning the instance data
