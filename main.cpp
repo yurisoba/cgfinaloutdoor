@@ -96,9 +96,10 @@ struct DrawElementsIndirectCommand {
 	unsigned int baseInstance;
 };
 struct InstanceProperties {
-	vec4 position;
+	//vec4 position;
 	//vec4 radians;
 	//int flag;
+	float index;
 };
 struct RawInstanceProperties {
 	vec4 position;
@@ -874,13 +875,7 @@ void initGrassBuilding() {
 
 		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1 + NUM_SAMPLE2].rotationMatrix = rotationMatrix;
 		
-		for (int i = 0; i < 4; i++) {
-			for (int j = 0; j < 4; j++) {
-				cout << rotationMatrix[i][j] << ' ';
-			}
-			cout << "\n";
-		}
-		cout << "\n";
+		
 	}
 	for (k = 0; k < NUM_SAMPLE4; k++) {
 		rawInsData[k + NUM_SAMPLE0 + NUM_SAMPLE1 + NUM_SAMPLE2 + NUM_SAMPLE3].position = vec4(POSITION_BUFFER4[k * 3 + 0], POSITION_BUFFER4[k * 3 + 1], POSITION_BUFFER4[k * 3 + 2],
@@ -981,7 +976,8 @@ void initGrassBuilding() {
 	// SSBO as vertex shader attribute
 	//glBindBuffer(GL_ARRAY_BUFFER, rawInstanceDataBufferHandle);
 	glBindBuffer(GL_ARRAY_BUFFER, validInstanceDataBufferHandle);
-	glVertexAttribPointer(3, 4, GL_FLOAT, false, 0, nullptr);
+	glVertexAttribPointer(3, 1, GL_FLOAT, false, 0, nullptr);
+	//glVertexAttribPointer(3, 4, GL_FLOAT, false, 0, nullptr);
 	glEnableVertexAttribArray(3);
 	glVertexAttribDivisor(3, 1);
 	// SSBO as draw-indirect-buffer

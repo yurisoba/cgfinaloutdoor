@@ -19,7 +19,8 @@ struct RawInstanceProperties {
 	mat4 rotationMatrix;
 };
 struct InstanceProperties {
-	vec4 position;
+	//vec4 position;
+	float index;
 	//vec4 radians;
 };
 
@@ -65,9 +66,12 @@ void main() {
 		// put data into valid-instance buffer
 
 		//currValidInstanceProps[offset + UNIQUE_IDX].position = rawInstanceProps[idx].position; //注意這邊有改成position
-		currValidInstanceProps[offset + UNIQUE_IDX].position.xyz = rawInstanceProps[idx].position.xyz; //改成只要存那個東西的idx就好
-		float idx_float = float(idx);
-		currValidInstanceProps[offset + UNIQUE_IDX].position.w = idx_float;
+		
+		//currValidInstanceProps[offset + UNIQUE_IDX].position.xyz = rawInstanceProps[idx].position.xyz; //改成只要存那個東西的idx就好
+		//float idx_float = float(idx);
+		//currValidInstanceProps[offset + UNIQUE_IDX].position.w = idx_float;
+
+		currValidInstanceProps[offset + UNIQUE_IDX].index = float(idx);
 	}
 
 }

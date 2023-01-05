@@ -3,7 +3,7 @@
 layout(location=0) in vec3 v_vertex;
 layout(location=1) in vec3 v_normal ;
 layout(location=2) in vec3 v_uv ;
-layout(location = 3) in vec4 v_worldPosOffset; //要改成idx
+layout(location = 3) in float index;
 layout(location = 4) in vec3 v_tangent;
 
 struct RawInstanceProperties {
@@ -54,7 +54,8 @@ void commonProcess(){//要改的
 	f_uv = v_uv ;
 
 	gl_Position = projMat * viewVertex ;*/
-	vec4 worldVertex = modelMat * vec4(v_vertex + v_worldPosOffset.xyz, 1.0);
+	//vec4 worldVertex = modelMat * vec4(v_vertex + v_worldPosOffset.xyz, 1.0);
+	vec4 worldVertex = modelMat * vec4(v_vertex , 1.0);
 	vec4 worldNormal = modelMat * vec4(v_normal, 0.0);
 
 	vec4 viewVertex = viewMat * worldVertex;
@@ -69,13 +70,14 @@ void commonProcess(){//要改的
 }
 
 void grass_building_process() {
-	mat4 rotationMatrix = rawInstanceProps[int(v_worldPosOffset.w)].rotationMatrix;
+	//mat4 rotationMatrix = rawInstanceProps[int(v_worldPosOffset.w)].rotationMatrix;
+	mat4 rotationMatrix = rawInstanceProps[int(index)].rotationMatrix;
 	//mat4 rotationMatrix = rawInstanceProps[gl_InstanceID].rotationMatrix;
 	//mat4 rotationMatrix = mat4(vec4(0, 0, -1, 0), vec4(0, 1, 0, 0), vec4(1, 0, 0, 0), vec4(0, 0, 0, 1));
 
 	vec4 v = rotationMatrix * vec4(v_vertex, 1.0);
 
-	vec4 worldVertex =  modelMat * vec4(v.xyz + v_worldPosOffset.xyz, 1.0) ;
+	vec4 worldVertex =  modelMat * vec4(v.xyz + rawInstanceProps[int(index)].position.xyz, 1.0) ;
 	vec4 worldNormal = modelMat * vec4(v_normal, 0.0) ;
 
 	vec4 viewVertex = viewMat  * worldVertex;
