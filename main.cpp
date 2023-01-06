@@ -770,7 +770,7 @@ void initGrassBuilding() {
 	// initialize the poisson samples
 	MyPoissonSample* sample0 = MyPoissonSample::fromFile("assets/poissonPoints_621043_after.ppd2");
 	MyPoissonSample* sample1 = MyPoissonSample::fromFile("assets/poissonPoints_1010.ppd2");
-	MyPoissonSample* sample2 = MyPoissonSample::fromFile("assets/poissonPoints_1010.ppd2");
+	MyPoissonSample* sample2 = MyPoissonSample::fromFile("assets/poissonPoints_2797.ppd2");
 	MyPoissonSample* sample3 = MyPoissonSample::fromFile("assets/cityLots_sub_0.ppd2");
 	MyPoissonSample* sample4 = MyPoissonSample::fromFile("assets/cityLots_sub_1.ppd2");
 	
