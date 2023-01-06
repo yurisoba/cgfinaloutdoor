@@ -56,7 +56,7 @@ void main() {
 	// determine if it is culled
 	bool frustumCulled = (clipSpaceV.x + dist  < -1.0) || (clipSpaceV.x - dist > 1.0) || 
 		(clipSpaceV.y + dist < -1.0) || (clipSpaceV.y - dist > 1.0) ||
-		(clipSpaceV.z + dist < -1.0) || (clipSpaceV.z - dist > 1.0);
+		(clipSpaceV.z + dist < -1.0) || (clipSpaceV.z - dist > 0.9961);
 
 	if (frustumCulled == false) {
 		// get UNIQUE buffer location for assigning the instance data
