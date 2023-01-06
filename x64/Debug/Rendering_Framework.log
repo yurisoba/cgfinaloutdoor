@@ -1,16 +1,16 @@
 ﻿  main.cpp
 C:\Users\kowal\OneDrive\清大上課用總資料夾\大二上\繪圖程式設計\homework\Final作業\GPA_2022_final_framework\Rendering_Framework\src\terrain\MyTerrainData.h(104,10): warning C4244: '正在初始化': 將 'float' 轉換為 'int'，由於類型不同，可能導致資料遺失
-C:\Users\kowal\OneDrive\清大上課用總資料夾\大二上\繪圖程式設計\homework\Final作業\GPA_2022_final_framework\Rendering_Framework\main.cpp(1193,91): warning C4244: '引數': 將 'double' 轉換為 'const int'，由於類型不同，可能導致資料遺失
-C:\Users\kowal\OneDrive\清大上課用總資料夾\大二上\繪圖程式設計\homework\Final作業\GPA_2022_final_framework\Rendering_Framework\main.cpp(1193,77): warning C4244: '引數': 將 'double' 轉換為 'const int'，由於類型不同，可能導致資料遺失
-C:\Users\kowal\OneDrive\清大上課用總資料夾\大二上\繪圖程式設計\homework\Final作業\GPA_2022_final_framework\Rendering_Framework\main.cpp(1196,93): warning C4244: '引數': 將 'double' 轉換為 'const int'，由於類型不同，可能導致資料遺失
-C:\Users\kowal\OneDrive\清大上課用總資料夾\大二上\繪圖程式設計\homework\Final作業\GPA_2022_final_framework\Rendering_Framework\main.cpp(1196,79): warning C4244: '引數': 將 'double' 轉換為 'const int'，由於類型不同，可能導致資料遺失
-C:\Users\kowal\OneDrive\清大上課用總資料夾\大二上\繪圖程式設計\homework\Final作業\GPA_2022_final_framework\Rendering_Framework\main.cpp(1199,92): warning C4244: '引數': 將 'double' 轉換為 'const int'，由於類型不同，可能導致資料遺失
-C:\Users\kowal\OneDrive\清大上課用總資料夾\大二上\繪圖程式設計\homework\Final作業\GPA_2022_final_framework\Rendering_Framework\main.cpp(1199,78): warning C4244: '引數': 將 'double' 轉換為 'const int'，由於類型不同，可能導致資料遺失
-C:\Users\kowal\OneDrive\清大上課用總資料夾\大二上\繪圖程式設計\homework\Final作業\GPA_2022_final_framework\Rendering_Framework\main.cpp(1202,94): warning C4244: '引數': 將 'double' 轉換為 'const int'，由於類型不同，可能導致資料遺失
-C:\Users\kowal\OneDrive\清大上課用總資料夾\大二上\繪圖程式設計\homework\Final作業\GPA_2022_final_framework\Rendering_Framework\main.cpp(1202,80): warning C4244: '引數': 將 'double' 轉換為 'const int'，由於類型不同，可能導致資料遺失
-C:\Users\kowal\OneDrive\清大上課用總資料夾\大二上\繪圖程式設計\homework\Final作業\GPA_2022_final_framework\Rendering_Framework\main.cpp(1209,34): warning C4244: '引數': 將 'double' 轉換為 'const int'，由於類型不同，可能導致資料遺失
-C:\Users\kowal\OneDrive\清大上課用總資料夾\大二上\繪圖程式設計\homework\Final作業\GPA_2022_final_framework\Rendering_Framework\main.cpp(1209,31): warning C4244: '引數': 將 'double' 轉換為 'const int'，由於類型不同，可能導致資料遺失
-C:\Users\kowal\OneDrive\清大上課用總資料夾\大二上\繪圖程式設計\homework\Final作業\GPA_2022_final_framework\Rendering_Framework\main.cpp(1274,77): warning C4305: '引數': 從 'double' 轉換為 'const float'，是由較大的類型轉換為較小的類型，可能導致資料遺失
-C:\Users\kowal\OneDrive\清大上課用總資料夾\大二上\繪圖程式設計\homework\Final作業\GPA_2022_final_framework\Rendering_Framework\main.cpp(1277,36): warning C4267: '正在初始化': 將 'size_t' 轉換為 'int'，資料可能遺失
-C:\Users\kowal\OneDrive\清大上課用總資料夾\大二上\繪圖程式設計\homework\Final作業\GPA_2022_final_framework\Rendering_Framework\main.cpp(1277,36): warning C4267: '正在初始化': 將 'size_t' 轉換為 'const int'，資料可能遺失
+C:\Users\kowal\OneDrive\清大上課用總資料夾\大二上\繪圖程式設計\homework\Final作業\GPA_2022_final_framework\Rendering_Framework\main.cpp(1382,91): warning C4244: '引數': 將 'double' 轉換為 'const int'，由於類型不同，可能導致資料遺失
+C:\Users\kowal\OneDrive\清大上課用總資料夾\大二上\繪圖程式設計\homework\Final作業\GPA_2022_final_framework\Rendering_Framework\main.cpp(1382,77): warning C4244: '引數': 將 'double' 轉換為 'const int'，由於類型不同，可能導致資料遺失
+C:\Users\kowal\OneDrive\清大上課用總資料夾\大二上\繪圖程式設計\homework\Final作業\GPA_2022_final_framework\Rendering_Framework\main.cpp(1385,93): warning C4244: '引數': 將 'double' 轉換為 'const int'，由於類型不同，可能導致資料遺失
+C:\Users\kowal\OneDrive\清大上課用總資料夾\大二上\繪圖程式設計\homework\Final作業\GPA_2022_final_framework\Rendering_Framework\main.cpp(1385,79): warning C4244: '引數': 將 'double' 轉換為 'const int'，由於類型不同，可能導致資料遺失
+C:\Users\kowal\OneDrive\清大上課用總資料夾\大二上\繪圖程式設計\homework\Final作業\GPA_2022_final_framework\Rendering_Framework\main.cpp(1388,92): warning C4244: '引數': 將 'double' 轉換為 'const int'，由於類型不同，可能導致資料遺失
+C:\Users\kowal\OneDrive\清大上課用總資料夾\大二上\繪圖程式設計\homework\Final作業\GPA_2022_final_framework\Rendering_Framework\main.cpp(1388,78): warning C4244: '引數': 將 'double' 轉換為 'const int'，由於類型不同，可能導致資料遺失
+C:\Users\kowal\OneDrive\清大上課用總資料夾\大二上\繪圖程式設計\homework\Final作業\GPA_2022_final_framework\Rendering_Framework\main.cpp(1391,94): warning C4244: '引數': 將 'double' 轉換為 'const int'，由於類型不同，可能導致資料遺失
+C:\Users\kowal\OneDrive\清大上課用總資料夾\大二上\繪圖程式設計\homework\Final作業\GPA_2022_final_framework\Rendering_Framework\main.cpp(1391,80): warning C4244: '引數': 將 'double' 轉換為 'const int'，由於類型不同，可能導致資料遺失
+C:\Users\kowal\OneDrive\清大上課用總資料夾\大二上\繪圖程式設計\homework\Final作業\GPA_2022_final_framework\Rendering_Framework\main.cpp(1398,34): warning C4244: '引數': 將 'double' 轉換為 'const int'，由於類型不同，可能導致資料遺失
+C:\Users\kowal\OneDrive\清大上課用總資料夾\大二上\繪圖程式設計\homework\Final作業\GPA_2022_final_framework\Rendering_Framework\main.cpp(1398,31): warning C4244: '引數': 將 'double' 轉換為 'const int'，由於類型不同，可能導致資料遺失
+C:\Users\kowal\OneDrive\清大上課用總資料夾\大二上\繪圖程式設計\homework\Final作業\GPA_2022_final_framework\Rendering_Framework\main.cpp(1464,77): warning C4305: '引數': 從 'double' 轉換為 'const float'，是由較大的類型轉換為較小的類型，可能導致資料遺失
+C:\Users\kowal\OneDrive\清大上課用總資料夾\大二上\繪圖程式設計\homework\Final作業\GPA_2022_final_framework\Rendering_Framework\main.cpp(1467,36): warning C4267: '正在初始化': 將 'size_t' 轉換為 'int'，資料可能遺失
+C:\Users\kowal\OneDrive\清大上課用總資料夾\大二上\繪圖程式設計\homework\Final作業\GPA_2022_final_framework\Rendering_Framework\main.cpp(1467,36): warning C4267: '正在初始化': 將 'size_t' 轉換為 'const int'，資料可能遺失
   Rendering_Framework.vcxproj -> C:\Users\kowal\OneDrive\清大上課用總資料夾\大二上\繪圖程式設計\homework\Final作業\GPA_2022_final_framework\x64\Debug\Rendering_Framework.exe

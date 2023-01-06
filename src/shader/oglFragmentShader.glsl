@@ -71,7 +71,7 @@ void main(){
 	else if (pixelProcessId == 11) { //draw rock
 		vec4 texel = texture(rockTexture, f_uv.xy);
 		kss_idx = 1;
-		fragColor = texel;
+		fragColor = withFog(texel);
 
 		if (FEAT(1)) {
 			vec3 N = normalize(fs_in.N);
@@ -87,7 +87,8 @@ void main(){
 		if (texel.a < 0.3)
 			discard;
 		kss_idx = 2;
-		fragColor = texel;
+		fragColor = withFog(texel);
+		//fragColor = texel;
 	}
 	else{
 		pureColor() ;

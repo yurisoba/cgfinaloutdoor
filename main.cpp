@@ -1015,7 +1015,7 @@ void renderGrassBuilding() {
         glActiveTexture(GL_TEXTURE0);
 }
 
-void activeComputeShader(mat4 view_projection_matrix) {
+void activeComputeShader(mat4 vm, mat4 pm) {
 	reset_cs_shader_program->useProgram();
 	glDispatchCompute(5, 1, 1);
 	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
@@ -1026,7 +1026,8 @@ void activeComputeShader(mat4 view_projection_matrix) {
 	// send the necessary information to compute shader (must after useProgram)
 	glUniform1i(NUM_TOTAL_INSTANCE_LOCATION, NUM_TOTAL_INSTANCE);
 	//mat4 view_projection_matrix = playerProjMat * playerViewMat;
-	glUniformMatrix4fv(7, 1, false, &view_projection_matrix[0][0]);
+	glUniformMatrix4fv(7, 1, false, &vm[0][0]);
+	glUniformMatrix4fv(8, 1, false, &pm[0][0]);
 
 	// start GPU process
 	glDispatchCompute((NUM_TOTAL_INSTANCE / 1024) + 1, 1, 1);
@@ -1289,8 +1290,9 @@ void paintGL(){
 	m_terrain->updateState(playerVM, playerViewOrg, playerProjMat, nullptr);
 	// =============================================
 	// compute shader	
-	mat4 view_projection_matrix = playerProjMat * playerVM;
-	activeComputeShader(view_projection_matrix);
+	//mat4 view_projection_matrix = playerProjMat * playerVM;
+
+	activeComputeShader(playerVM, playerProjMat);
 
 	// =============================================
 	// start rendering
@@ -1339,7 +1341,7 @@ void paintGL(){
 	glUniform1ui(features_loc, features);
 	glViewport(0, 0, FRAME_WIDTH, FRAME_HEIGHT);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(1.0, 1.0, 1.0, 1.0);
+	glClearColor(0.0, 0.0, 0.0, 1.0);
 	glBindVertexArray(final_vao);
 
 	glActiveTexture(GL_TEXTURE0);

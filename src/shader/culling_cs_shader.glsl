@@ -34,7 +34,8 @@ layout(std430, binding = 2) buffer CurrValidInstanceData {
 	InstanceProperties currValidInstanceProps[];
 };
 layout(location = 6) uniform int numMaxInstance;
-layout(location = 7) uniform mat4 viewProjMat; //player view projection
+layout(location = 7) uniform mat4 ViewMat; //player view mat
+layout(location = 8) uniform mat4 ProjMat; //player proj mat
 
 
 void main() {
@@ -49,16 +50,30 @@ void main() {
 	//mat4 modelMat = mat4(rawInstanceProps[idx].matCol0, rawInstanceProps[idx].matCol1,
 	//	rawInstanceProps[idx].matCol2, rawInstanceProps[idx].matCol3);
 
-	vec4 clipSpaceV = viewProjMat * vec4(rawInstanceProps[idx].position.xyz +
+	//vec4 clipSpaceV = ProjMat * ViewMat * vec4(rawInstanceProps[idx].position.xyz +
+	//	rawInstanceProps[idx].boundSphere.xyz, 1.0);
+
+	vec4 worldSpaceV = ViewMat * vec4(rawInstanceProps[idx].position.xyz +
+		rawInstanceProps[idx].boundSphere.xyz, 1.0);
+
+	float world_dist = rawInstanceProps[idx].boundSphere.w;
+
+	
+	bool world_Culled = (worldSpaceV.x + world_dist < -400.0) || (worldSpaceV.x - world_dist > 400.0) ||
+		(worldSpaceV.y + world_dist < -400.0) || (worldSpaceV.y - world_dist > 400.0) ||
+		(worldSpaceV.z + world_dist < -380.0) || (worldSpaceV.z - world_dist > 1.0);
+
+
+	vec4 clipSpaceV = ProjMat * ViewMat * vec4(rawInstanceProps[idx].position.xyz +
 		rawInstanceProps[idx].boundSphere.xyz, 1.0);
 	float dist = rawInstanceProps[idx].boundSphere.w / clipSpaceV.w;
 	clipSpaceV = clipSpaceV / clipSpaceV.w;
 	// determine if it is culled
-	bool frustumCulled = (clipSpaceV.x + dist  < -1.0) || (clipSpaceV.x - dist > 1.0) || 
-		(clipSpaceV.y + dist < -1.0) || (clipSpaceV.y - dist > 1.0) ||
-		(clipSpaceV.z + dist < -1.0) || (clipSpaceV.z - dist > 0.9963);
+	bool frustumCulled = (clipSpaceV.x + dist*2  < -1.0) || (clipSpaceV.x - dist*2 > 1.0) || 
+		(clipSpaceV.y + dist*3 < -1.0) || (clipSpaceV.y - dist*3 > 1.0) ||
+		(clipSpaceV.z + dist*2 < -1.0) || (clipSpaceV.z - dist > 0.9963);
 
-	if (frustumCulled == false) {
+	if (world_Culled == false && frustumCulled == false) {
 		// get UNIQUE buffer location for assigning the instance data
 		// it also updates instanceCount
 
