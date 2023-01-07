@@ -6,6 +6,7 @@ layout(location=2) in vec3 v_uv ;
 layout(location = 3) in float index;
 layout(location = 4) in vec3 v_tangent;
 
+
 struct RawInstanceProperties {
 	vec4 position;
 	vec4 boundSphere;
@@ -25,6 +26,7 @@ out VS_OUT{
 	vec3 L;
 	vec3 V;
 	vec3 T;
+	vec4 lightSpacePos;
 }vs_out;
 
 
@@ -38,6 +40,8 @@ layout(location = 5) uniform sampler2D elevationMap ;
 layout(location = 6) uniform sampler2D normalMap ;
 
 layout(location = 9) uniform mat4 terrainVToUVMat;
+
+layout(location = 20) uniform mat4 lightSpaceMatrix;
 
 //blinn phong shading
 uniform vec3 light_pos = vec3(0.4, 0.5, 0.8);
@@ -67,6 +71,8 @@ void commonProcess(){//要改的
 	f_viewVertex = viewVertex.xyz;
 	f_uv = v_uv;
 	gl_Position = projMat * viewVertex;
+
+	vs_out.lightSpacePos = lightSpaceMatrix * worldVertex;
 }
 
 void grass_building_process() {
@@ -90,6 +96,9 @@ void grass_building_process() {
 	vs_out.N = worldNormal.xyz;
 
 	gl_Position = projMat * viewVertex;
+
+	//這邊可以做判斷是否是小草
+	vs_out.lightSpacePos = lightSpaceMatrix * worldVertex;
 }
 
 void blinnPhong() {
@@ -99,6 +108,7 @@ void blinnPhong() {
 	vs_out.N = vec3(modelMat * vec4(v_normal, 1.0));
 
 	vs_out.L = light_pos - P.xyz;
+	
 }
 
 void terrainProcess(){

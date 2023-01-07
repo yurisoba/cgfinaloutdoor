@@ -14,6 +14,7 @@ layout(binding = 11) uniform sampler2D rockTexture;
 layout(binding = 12) uniform sampler2D rockNormal;
 layout(binding = 24) uniform sampler2DArray albedoTextureArray;
 
+layout(binding = 20) uniform sampler2D shadowMap;
 
 in VS_OUT
 {
@@ -21,6 +22,7 @@ in VS_OUT
 	vec3 L;
 	vec3 V;
 	vec3 T;
+	vec4 lightSpacePos;
 } fs_in;
 
 uniform uint features;
@@ -50,6 +52,30 @@ void terrainPass(){
 void pureColor(){
 	fragColor = withFog(vec4(1.0, 0.0, 0.0, 1.0)) ;
 	fragNormal = vec4(1.0);
+}
+
+float shadowContribution(vec4 fragPosLightSpace) {
+	// perform perspective divide
+	vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+
+	// transform to [0,1] range
+	projCoords = projCoords * 0.5 + 0.5;
+
+	// get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
+	float closestDepth = texture(shadowMap, projCoords.xy).r;
+
+	// get depth of current fragment from light's perspective
+	float currentDepth = projCoords.z;
+
+	// calculate bias (based on depth map resolution and slope)
+	//vec3 normal = normalize(fs_in.N);
+	//vec3 lightDir = normalize(lightPos - vertexData.worldSpacePos);
+	//float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
+	float bias = 0.05;
+
+	float shadow = 0.0;
+	shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
+	return shadow;
 }
 
 void main(){

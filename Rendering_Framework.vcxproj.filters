@@ -184,5 +184,11 @@
     <None Include="src\shader\def_vert.glsl">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="src\shader\shadowMapping.fs.glsl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="src\shader\shadowMapping.vs.glsl">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -72,6 +72,8 @@
     <None Include="src\shader\oglFragmentShader.glsl" />
     <None Include="src\shader\oglVertexShader.glsl" />
     <None Include="src\shader\reset_cs_shader.glsl" />
+    <None Include="src\shader\shadowMapping.fs.glsl" />
+    <None Include="src\shader\shadowMapping.vs.glsl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{ADA5FF44-3FBE-44D5-94ED-FFD82E3DF373}</ProjectGuid>

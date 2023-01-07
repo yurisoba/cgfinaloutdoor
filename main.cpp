@@ -82,6 +82,7 @@ ShaderProgram* reset_cs_shader_program;
 ShaderProgram* culling_cs_shader_program;
 ShaderProgram* shaderProgram;
 ShaderProgram* defShaderProgram;
+ShaderProgram* LightDepthShaderProgram;
 
 GLuint          NUM_TOTAL_INSTANCE_LOCATION;
 int             NUM_TOTAL_INSTANCE;
@@ -121,8 +122,68 @@ mat4 model_matrix;
 mat4 view_matrix;
 mat4 proj_matrix;
 
-//===============================================
+//cascaded shadow mapping===============================================
+vec3 light_pos = vec3(0.4, 0.5, 0.8);
+#define SHADOW_OTHO	15.0f
+#define POINT_LIGHT_NEARPLANE 0.1f
+#define POINT_LIGHT_FARPLANE 50.0f
+#define DIRECTIONAL_LIGHT_NEARPLANE 0.01f
+#define DIRECTIONAL_LIGHT_FARPLANE 50.0f
 
+mat4 lightSpaceMatrix;
+
+int				shadowmap_resolution = 2048;
+GLuint			depthMapFBO; //frame buffer
+GLuint			shadowDepthMap; //texture
+
+GLuint          lightSpaceMatrix_location;
+GLuint          BlinnPhonglightSpaceMatrix_location;
+
+void initShadowMapping() {
+	glGenFramebuffers(1, &depthMapFBO);
+	// create depth texture
+	glGenTextures(1, &shadowDepthMap);
+	glBindTexture(GL_TEXTURE_2D, shadowDepthMap);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadowmap_resolution, shadowmap_resolution, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	GLfloat borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+	// attach depth texture as FBO's depth buffer
+	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowDepthMap, 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void drawShadowMapping() {
+	//設定光源的space matrix(proj * view)
+	mat4 lightProjection, lightView;
+	lightProjection = glm::ortho(-SHADOW_OTHO, SHADOW_OTHO, -SHADOW_OTHO, SHADOW_OTHO, DIRECTIONAL_LIGHT_NEARPLANE, DIRECTIONAL_LIGHT_FARPLANE);
+	lightView = glm::lookAt(light_pos, vec3(0.0f), vec3(0.0, 1.0, 0.0));
+	lightSpaceMatrix = lightProjection * lightView;
+
+	//用光源視角畫一張depth map
+	LightDepthShaderProgram->useProgram();
+	{
+		glUniformMatrix4fv(lightSpaceMatrix_location, 1, GL_FALSE, value_ptr(lightSpaceMatrix));
+		glViewport(0, 0, shadowmap_resolution, shadowmap_resolution);
+		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+		glClear(GL_DEPTH_BUFFER_BIT);
+
+		//畫models
+		
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+	glUseProgram(0);
+
+}
+
+
+//=======================================================================
 typedef struct _texture_data
 {
 	_texture_data() : width(0), height(0), data(0) {}
@@ -535,6 +596,7 @@ void initAirplane() {
 void renderAirplane(mat4 airplaneModelMat) {
 	//mat4 airplaneModelMat = m_myCameraManager->airplaneModelMatrix();
 	glUniformMatrix4fv(model_location, 1, GL_FALSE, value_ptr(airplaneModelMat));
+	glUniformMatrix4fv(BlinnPhonglightSpaceMatrix_location, 1, GL_FALSE, value_ptr(lightSpaceMatrix));
 
 	glUniform1i(SceneManager::Instance()->m_fs_pixelProcessIdHandle, 10);
 	glUniform1i(SceneManager::Instance()->m_vs_vertexProcessIdHandle, 10);
@@ -625,6 +687,7 @@ void renderRock() {
 	rockModelMat = translate(rockModelMat, position );
 	
 	glUniformMatrix4fv(model_location, 1, GL_FALSE, value_ptr(rockModelMat));
+	glUniformMatrix4fv(BlinnPhonglightSpaceMatrix_location, 1, GL_FALSE, value_ptr(lightSpaceMatrix));
 
 	glUniform1i(SceneManager::Instance()->m_fs_pixelProcessIdHandle, 11);
 	glUniform1i(SceneManager::Instance()->m_vs_vertexProcessIdHandle, 11);
@@ -994,6 +1057,7 @@ void renderGrassBuilding() {
 	mat4 Identy_Init(1.0);
 	model_matrix = Identy_Init;
 	glUniformMatrix4fv(model_location, 1, GL_FALSE, &model_matrix[0][0]);
+	glUniformMatrix4fv(BlinnPhonglightSpaceMatrix_location, 1, GL_FALSE, value_ptr(lightSpaceMatrix));
 
     glActiveTexture(GL_TEXTURE0 + 24);
 	glBindTexture(GL_TEXTURE_2D_ARRAY, textureArrayHandle);
@@ -1133,6 +1197,33 @@ bool initializeGL(){
 	delete vsShader;
 	delete fsShader;
 
+	//shadow mapping shader program
+	Shader* shadowMappingVS = new Shader(GL_VERTEX_SHADER);
+	shadowMappingVS->createShaderFromFile("src\\shader\\shadowMapping.vs.glsl");
+	std::cout << shadowMappingVS->shaderInfoLog() << "\n";
+
+	Shader* shadowMappingFS = new Shader(GL_FRAGMENT_SHADER);
+	shadowMappingFS->createShaderFromFile("src\\shader\\shadowMapping.fs.glsl");
+	std::cout << shadowMappingFS->shaderInfoLog() << "\n";
+
+	LightDepthShaderProgram = new ShaderProgram();
+	LightDepthShaderProgram->init();
+	LightDepthShaderProgram->attachShader(shadowMappingVS);
+	LightDepthShaderProgram->attachShader(shadowMappingFS);
+	LightDepthShaderProgram->checkStatus();
+	if (LightDepthShaderProgram->status() != ShaderProgramStatus::READY) {
+		return false;
+	}
+	LightDepthShaderProgram->linkProgram();
+
+	shadowMappingVS->releaseShader();
+	shadowMappingFS->releaseShader();
+
+	delete shadowMappingVS;
+	delete shadowMappingFS;
+
+	//deffered rendering shader program
+
 	auto* defVsShader = new Shader(GL_VERTEX_SHADER);
 	defVsShader->createShaderFromFile("src\\shader\\def_vert.glsl");
 	std::cout << defVsShader->shaderInfoLog() << std::endl;
@@ -1205,6 +1296,8 @@ bool initializeGL(){
 	proj_location = glGetUniformLocation(shaderProgram->programId(), "projMat");
 	features_loc2 = glGetUniformLocation(shaderProgram->programId(), "features");
 	features_loc = glGetUniformLocation(defShaderProgram->programId(), "features");
+	lightSpaceMatrix_location = glGetUniformLocation(LightDepthShaderProgram->programId(), "lightSpaceMatrix");
+	BlinnPhonglightSpaceMatrix_location = glGetUniformLocation(shaderProgram->programId(), "lightSpaceMatrix");
 	// =================================================================
 	// init renderer
 	defaultRenderer = new SceneRenderer();
@@ -1341,7 +1434,7 @@ void paintGL(){
 	glUniform1ui(features_loc, features);
 	glViewport(0, 0, FRAME_WIDTH, FRAME_HEIGHT);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.0, 0.0, 0.0, 1.0);
+	glClearColor(1.0, 1.0, 1.0, 1.0);
 	glBindVertexArray(final_vao);
 
 	glActiveTexture(GL_TEXTURE0);
