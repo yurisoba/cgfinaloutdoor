@@ -4,6 +4,7 @@ layout (location = 0) out vec4 fragColor;
 layout (binding = 0) uniform sampler2D g_col;
 layout (binding = 1) uniform sampler2D g_nom;
 layout (binding = 2) uniform sampler2D g_pos;
+layout (binding = 3) uniform sampler2D g_contribs;
 
 uniform vec3 light_pos = vec3(0.4, 0.5, 0.8);
 
@@ -20,7 +21,7 @@ uniform vec4 ksss[] = {
 };
 
 void blinnPhong() {
-	float shadow = 0.0; //代表有陰影
+	float shadow = texelFetch(g_contribs, ivec2(gl_FragCoord.xy), 0).r;
 	vec3 N = texelFetch(g_nom, ivec2(gl_FragCoord.xy), 0).rgb; // world space normal
 	vec4 gp = texelFetch(g_pos, ivec2(gl_FragCoord.xy), 0);
 	vec3 ws = gp.rgb; // world space coordinates

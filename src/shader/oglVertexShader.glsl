@@ -98,7 +98,8 @@ void grass_building_process() {
 	gl_Position = projMat * viewVertex;
 
 	//這邊可以做判斷是否是小草
-	vs_out.lightSpacePos = lightSpaceMatrix * worldVertex;
+	if (v_uv.z != 0)
+		vs_out.lightSpacePos = lightSpaceMatrix * worldVertex;
 }
 
 void blinnPhong() {
@@ -139,6 +140,8 @@ void terrainProcess(){
 }
 
 void main(){
+	vs_out.lightSpacePos = vec4(1);
+
 	if(vertexProcessIdx == 0){
 		commonProcess() ;
 	}

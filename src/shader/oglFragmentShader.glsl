@@ -6,6 +6,7 @@ in vec3 f_uv ;
 layout (location = 0) out vec4 fragColor ;
 layout (location = 1) out vec4 fragNormal;
 layout (location = 2) out vec4 ws_coords;
+layout (location = 3) out vec4 contribs;
 layout(location = 2) uniform int pixelProcessId;
 layout(location = 4) uniform sampler2D albedoTexture;
 
@@ -54,7 +55,7 @@ void pureColor(){
 	fragNormal = vec4(1.0);
 }
 
-float shadowContribution(vec4 fragPosLightSpace) {
+void shadowContribution(vec4 fragPosLightSpace) {
 	// perform perspective divide
 	vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
 
@@ -74,14 +75,15 @@ float shadowContribution(vec4 fragPosLightSpace) {
 	float bias = 0.05;
 
 	float shadow = 0.0;
-	shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
-	return shadow;
+	shadow = currentDepth - bias > closestDepth ? 0.0 : 1.0;
+	contribs.r = shadow;
 }
 
 void main(){
     int kss_idx = 0;
 
 	fragNormal = vec4(normalize(fs_in.N), 0.0);
+	shadowContribution(fs_in.lightSpacePos);
 
 	if(pixelProcessId == 5){
 		pureColor() ;

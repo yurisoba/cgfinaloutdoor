@@ -43,6 +43,8 @@ bool m_rightButtonPressed = false;
 double cursorPos[2];
 
 
+int airplane_idx = 0;
+int rock_idx;
 
 MyImGuiPanel* m_imguiPanel = nullptr;
 
@@ -137,6 +139,7 @@ GLuint			depthMapFBO; //frame buffer
 GLuint			shadowDepthMap; //texture
 
 GLuint          lightSpaceMatrix_location;
+GLuint          ldmodel_loc;
 GLuint          BlinnPhonglightSpaceMatrix_location;
 
 void initShadowMapping() {
@@ -166,6 +169,8 @@ void drawShadowMapping_start() {
 	lightView = glm::lookAt(light_pos, vec3(0.0f), vec3(0.0, 1.0, 0.0));
 	lightSpaceMatrix = lightProjection * lightView;
 
+	const glm::mat4 airplaneModelMat = m_myCameraManager->airplaneModelMatrix();
+
 	//用光源視角畫一張depth map
 	LightDepthShaderProgram->useProgram();
 	{
@@ -175,8 +180,28 @@ void drawShadowMapping_start() {
 		glClear(GL_DEPTH_BUFFER_BIT);
 
 		//畫models
-		
-		
+		// airplane
+		glUniformMatrix4fv(ldmodel_loc, 1, GL_FALSE, value_ptr(airplaneModelMat));
+		glBindVertexArray(airplane_vao);
+		glDrawElements(GL_TRIANGLES, airplane_idx, GL_UNSIGNED_INT, 0);
+
+		// rock
+		mat4 identity = mat4(1.0);
+		mat4 rockModelMat = identity;
+		vec3 position = vec3(25.92, 18.27, 11.75);
+		rockModelMat = translate(rockModelMat, position );
+		glUniformMatrix4fv(ldmodel_loc, 1, GL_FALSE, value_ptr(rockModelMat));
+		glBindVertexArray(rock_vao);
+		glDrawElements(GL_TRIANGLES, rock_idx, GL_UNSIGNED_INT, 0);
+
+		// instanced
+		mat4 Identy_Init(1.0);
+		model_matrix = Identy_Init;
+		glUniformMatrix4fv(ldmodel_loc, 1, GL_FALSE, &model_matrix[0][0]);
+		glBindVertexArray(grass_building_vao);
+		glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, (GLvoid*)0, 5, 0);
+
+		glBindVertexArray(0);
 	}
 }
 
@@ -542,7 +567,6 @@ void vsyncDisabled(GLFWwindow *window) {
 
 vector<Model> m_Models;
 
-int airplane_idx = 0;
 void initAirplane() {
 	current_idx = 10.0;
 	Model obj1("assets/airplane.obj");
@@ -611,7 +635,6 @@ void renderAirplane(mat4 airplaneModelMat) {
 	glDrawElements(GL_TRIANGLES, airplane_idx, GL_UNSIGNED_INT, 0);
 }
 
-int rock_idx;
 void initRock() {
 	current_idx = 11.0;
 	Model obj1("assets/MagicRock/magicRock.obj");
@@ -1100,11 +1123,11 @@ void activeComputeShader(mat4 vm, mat4 pm) {
 	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
 
-GLuint gbuf, gbuf_tex[4], final_vao;
+GLuint gbuf, gbuf_tex[5], final_vao;
 void reinitFB() {
 	glBindFramebuffer(GL_FRAMEBUFFER, gbuf);
 
-	glGenTextures(4, gbuf_tex);
+	glGenTextures(5, gbuf_tex);
 	glBindTexture(GL_TEXTURE_2D, gbuf_tex[0]);
 	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, FRAME_WIDTH, FRAME_HEIGHT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -1123,9 +1146,15 @@ void reinitFB() {
 	glBindTexture(GL_TEXTURE_2D, gbuf_tex[3]);
 	glTexStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH_COMPONENT32F, FRAME_WIDTH, FRAME_HEIGHT);
 
+	glBindTexture(GL_TEXTURE_2D, gbuf_tex[4]);
+	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, FRAME_WIDTH, FRAME_HEIGHT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gbuf_tex[0], 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gbuf_tex[1], 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gbuf_tex[2], 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, gbuf_tex[4], 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, gbuf_tex[3], 0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -1300,6 +1329,7 @@ bool initializeGL(){
 	features_loc2 = glGetUniformLocation(shaderProgram->programId(), "features");
 	features_loc = glGetUniformLocation(defShaderProgram->programId(), "features");
 	lightSpaceMatrix_location = glGetUniformLocation(LightDepthShaderProgram->programId(), "lightSpaceMatrix");
+	ldmodel_loc = glGetUniformLocation(LightDepthShaderProgram->programId(), "model");
 	BlinnPhonglightSpaceMatrix_location = glGetUniformLocation(shaderProgram->programId(), "lightSpaceMatrix");
 	// =================================================================
 	// init renderer
@@ -1396,18 +1426,23 @@ void paintGL(){
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
+	drawShadowMapping_start();
+	drawShadowMapping_end();
+
 	// start new frame
 	defaultRenderer->setViewport(0, 0, FRAME_WIDTH, FRAME_HEIGHT);
 	defaultRenderer->startNewFrame();
 
-	const GLenum dbufs[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
+	const GLenum dbufs[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3};
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gbuf);
-	glDrawBuffers(3, dbufs);
+	glDrawBuffers(4, dbufs);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	const GLfloat white[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	const GLfloat black[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	glClearBufferfv(GL_COLOR, 0, white);
 	glClearBufferfv(GL_COLOR, 1, white);
 	glClearBufferfv(GL_COLOR, 2, white);
+	glClearBufferfv(GL_COLOR, 3, black);
 	glClearBufferfv(GL_DEPTH, 0, white);
 
 	// rendering with player view		
@@ -1446,6 +1481,8 @@ void paintGL(){
 	glBindTexture(GL_TEXTURE_2D, gbuf_tex[1]);
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, gbuf_tex[2]);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, gbuf_tex[4]);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
 	ImGui::Begin("My name is window");
