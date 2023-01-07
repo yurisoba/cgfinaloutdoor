@@ -20,6 +20,7 @@ uniform vec4 ksss[] = {
 };
 
 void blinnPhong() {
+	float shadow = 0.0; //代表有陰影
 	vec3 N = texelFetch(g_nom, ivec2(gl_FragCoord.xy), 0).rgb; // world space normal
 	vec4 gp = texelFetch(g_pos, ivec2(gl_FragCoord.xy), 0);
 	vec3 ws = gp.rgb; // world space coordinates
@@ -50,11 +51,11 @@ void blinnPhong() {
 
 	//diffuse
 	//outColor += white_Id * vec4(kd, 1.0) + max(dot(N, L), 0.0);
-	outColor += max(dot(N, L), 0.0) * fragColor * ld;
+	outColor += max(dot(N, L), 0.0) * fragColor * ld * (1.0 - shadow);
 
 	//specular
 	float spec = pow(max(dot(N, H), 0.0), shininess);
-	outColor += ls * vec4(ks, 1.0) * spec + ls * fragColor * spec;
+	outColor += ls * vec4(ks, 1.0) * spec + ls * fragColor * spec * (1.0 - shadow);
 
 	fragColor = outColor;
 }

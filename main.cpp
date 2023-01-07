@@ -159,7 +159,7 @@ void initShadowMapping() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void drawShadowMapping() {
+void drawShadowMapping_start() {
 	//設定光源的space matrix(proj * view)
 	mat4 lightProjection, lightView;
 	lightProjection = glm::ortho(-SHADOW_OTHO, SHADOW_OTHO, -SHADOW_OTHO, SHADOW_OTHO, DIRECTIONAL_LIGHT_NEARPLANE, DIRECTIONAL_LIGHT_FARPLANE);
@@ -176,12 +176,14 @@ void drawShadowMapping() {
 
 		//畫models
 		
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		
 	}
-	glUseProgram(0);
-
 }
 
+void drawShadowMapping_end() {
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glUseProgram(0);
+}
 
 //=======================================================================
 typedef struct _texture_data
@@ -1168,6 +1170,7 @@ bool initializeGL(){
 	initTexture();
 
 	initFB();
+	initShadowMapping();
 
 	// initialize shader program
 	// vertex shader
