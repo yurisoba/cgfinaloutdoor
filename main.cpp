@@ -646,8 +646,8 @@ void initTexture() {
 	texture_data tex0 = loadImg("assets/grassB_albedo.png");
 	texture_data tex1 = loadImg("assets/bush01.png");
 	texture_data tex2 = loadImg("assets/bush05.png");
-    texture_data tex3 = loadImg("assets/Medieval_Building_LowPoly/Medieval_Building_LowPoly_V2_Albedo_small.png");
-    texture_data tex4 = loadImg("assets/Medieval_Building_LowPoly/Medieval_Building_LowPoly_V1_Albedo_small.png");
+    texture_data tex3 = loadImg("assets/Medieval_Building_LowPoly/Medieval_Building_LowPoly_V2_Albedo_small.png", false);
+    texture_data tex4 = loadImg("assets/Medieval_Building_LowPoly/Medieval_Building_LowPoly_V1_Albedo_small.png", false);
 
 	// create texture array
 	glGenTextures(1, &textureArrayHandle);
