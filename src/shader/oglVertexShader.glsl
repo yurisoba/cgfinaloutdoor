@@ -92,15 +92,6 @@ void grass_building_process() {
 	gl_Position = projMat * viewVertex;
 }
 
-void blinnPhong() {
-	mat4 mv_matrix = viewMat * modelMat;
-	vec4 P = mv_matrix * vec4(v_vertex, 1.0);
-	
-	vs_out.N = vec3(modelMat * vec4(v_normal, 1.0));
-
-	vs_out.L = light_pos - P.xyz;
-}
-
 void terrainProcess(){
 	vec4 worldV = modelMat * vec4(v_vertex, 1.0) ;
 	// calculate uv
@@ -136,17 +127,14 @@ void main(){
 		terrainProcess() ;
 	}
 	else if (vertexProcessIdx == 10) { //draw airplane
-		blinnPhong();
 		commonProcess();
 		//grass_building_process();
 	}
 	else if (vertexProcessIdx == 11) { //draw rock
-		blinnPhong();
 		commonProcess();
 		vs_out.T = v_tangent;
 	}
 	else if (vertexProcessIdx == 12) { //draw grass and building
-		blinnPhong();
 		grass_building_process();
 	}
 	else{

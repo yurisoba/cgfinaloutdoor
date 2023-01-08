@@ -55,7 +55,7 @@ void pureColor(){
 void main(){
     int kss_idx = 0;
 
-	fragNormal = vec4(normalize(fs_in.N), 0.0);
+	fragNormal = vec4(fs_in.N, 0.0);
 
 	if(pixelProcessId == 5){
 		pureColor() ;

@@ -70,6 +70,8 @@ void main(void)
 
 	fragColor = vec4(pow(fragColor.rgb, vec3(0.5)), fragColor.a);
 
+	if (FEAT(12))       // diffuse / ambient
+		fragColor = texelFetch(g_col, ivec2(gl_FragCoord.xy), 0);
 	if (FEAT(13))		// ws_vtx
 		fragColor = vec4(normalize(texelFetch(g_pos, ivec2(gl_FragCoord.xy), 0).rgb) * 0.5 + 0.5, 1.0);
 	if (FEAT(14))		// normal
