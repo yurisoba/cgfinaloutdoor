@@ -57,6 +57,8 @@ void blinnPhong() {
 	outColor += ls * vec4(ks, 1.0) * spec + ls * fragColor * spec;
 
 	fragColor = outColor;
+	// gamma
+	fragColor = vec4(pow(fragColor.rgb, vec3(0.5)), fragColor.a);
 }
 
 #define FEAT(id) ((features & (1 << id)) != 0)
@@ -67,8 +69,6 @@ void main(void)
 
 	if (FEAT(0))
 		blinnPhong();
-
-	fragColor = vec4(pow(fragColor.rgb, vec3(0.5)), fragColor.a);
 
 	if (FEAT(12))       // diffuse / ambient
 		fragColor = texelFetch(g_col, ivec2(gl_FragCoord.xy), 0);

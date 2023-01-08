@@ -76,9 +76,10 @@ void grass_building_process() {
 	//mat4 rotationMatrix = mat4(vec4(0, 0, -1, 0), vec4(0, 1, 0, 0), vec4(1, 0, 0, 0), vec4(0, 0, 0, 1));
 
 	vec4 v = rotationMatrix * vec4(v_vertex, 1.0);
+	vec4 n = rotationMatrix * vec4(v_normal, 1.0);
 
 	vec4 worldVertex =  modelMat * vec4(v.xyz + rawInstanceProps[int(index)].position.xyz, 1.0) ;
-	vec4 worldNormal = modelMat * vec4(v_normal, 0.0) ;
+	vec4 worldNormal = modelMat * n;
 
 	vec4 viewVertex = viewMat  * worldVertex;
 	vec4 viewNormal = viewMat  * worldNormal;

@@ -1310,8 +1310,8 @@ void paintGL(){
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	const GLfloat white[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	const GLfloat black[] = { 0.0f, 0.0f, 0.0f, 0.0f };
-	glClearBufferfv(GL_COLOR, 0, white);
-	glClearBufferfv(GL_COLOR, 1, white);
+	glClearBufferfv(GL_COLOR, 0, black);
+	glClearBufferfv(GL_COLOR, 1, black);
 	glClearBufferfv(GL_COLOR, 2, black);
 	glClearBufferfv(GL_DEPTH, 0, white);
 
