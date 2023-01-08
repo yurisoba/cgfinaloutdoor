@@ -52,11 +52,11 @@ void blinnPhong() {
 
 	//diffuse
 	//outColor += white_Id * vec4(kd, 1.0) + max(dot(N, L), 0.0);
-	outColor += max(dot(N, L), 0.0) * fragColor * ld * (1.0 - shadow);
+	outColor += max(dot(N, L), 0.0) * fragColor * ld * shadow;
 
 	//specular
 	float spec = pow(max(dot(N, H), 0.0), shininess);
-	outColor += ls * vec4(ks, 1.0) * spec + ls * fragColor * spec * (1.0 - shadow);
+	outColor += ls * vec4(ks, 1.0) * spec + ls * fragColor * spec * shadow;
 
 	fragColor = outColor;
 }

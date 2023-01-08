@@ -139,7 +139,7 @@ GLuint			depthMapFBO; //frame buffer
 GLuint			shadowDepthMap; //texture
 
 GLuint          lightSpaceMatrix_location;
-GLuint          ldmodel_loc;
+GLuint          ldmodel_loc, ldmode_loc;
 GLuint          BlinnPhonglightSpaceMatrix_location;
 
 void initShadowMapping() {
@@ -165,7 +165,7 @@ void initShadowMapping() {
 void drawShadowMapping_start() {
 	//設定光源的space matrix(proj * view)
 	mat4 lightProjection, lightView;
-	lightProjection = glm::ortho(-SHADOW_OTHO, SHADOW_OTHO, -SHADOW_OTHO, SHADOW_OTHO, DIRECTIONAL_LIGHT_NEARPLANE, DIRECTIONAL_LIGHT_FARPLANE);
+	lightProjection = glm::ortho(-SHADOW_OTHO, SHADOW_OTHO, -SHADOW_OTHO, SHADOW_OTHO, -10.0f, DIRECTIONAL_LIGHT_FARPLANE);
 	lightView = glm::lookAt(light_pos, vec3(0.0f), vec3(0.0, 1.0, 0.0));
 	lightSpaceMatrix = lightProjection * lightView;
 
@@ -174,6 +174,7 @@ void drawShadowMapping_start() {
 	//用光源視角畫一張depth map
 	LightDepthShaderProgram->useProgram();
 	{
+		glUniform1i(ldmode_loc, 0);
 		glUniformMatrix4fv(lightSpaceMatrix_location, 1, GL_FALSE, value_ptr(lightSpaceMatrix));
 		glViewport(0, 0, shadowmap_resolution, shadowmap_resolution);
 		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
@@ -194,6 +195,7 @@ void drawShadowMapping_start() {
 		glBindVertexArray(rock_vao);
 		glDrawElements(GL_TRIANGLES, rock_idx, GL_UNSIGNED_INT, 0);
 
+		glUniform1i(ldmode_loc, 1);
 		// instanced
 		mat4 Identy_Init(1.0);
 		model_matrix = Identy_Init;
@@ -1330,6 +1332,7 @@ bool initializeGL(){
 	features_loc = glGetUniformLocation(defShaderProgram->programId(), "features");
 	lightSpaceMatrix_location = glGetUniformLocation(LightDepthShaderProgram->programId(), "lightSpaceMatrix");
 	ldmodel_loc = glGetUniformLocation(LightDepthShaderProgram->programId(), "model");
+	ldmode_loc = glGetUniformLocation(LightDepthShaderProgram->programId(), "mode");
 	BlinnPhonglightSpaceMatrix_location = glGetUniformLocation(shaderProgram->programId(), "lightSpaceMatrix");
 	// =================================================================
 	// init renderer
