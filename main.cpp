@@ -1441,7 +1441,7 @@ void paintGL(){
 	const GLfloat black[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	glClearBufferfv(GL_COLOR, 0, white);
 	glClearBufferfv(GL_COLOR, 1, white);
-	glClearBufferfv(GL_COLOR, 2, white);
+	glClearBufferfv(GL_COLOR, 2, black);
 	glClearBufferfv(GL_COLOR, 3, black);
 	glClearBufferfv(GL_DEPTH, 0, white);
 
@@ -1489,7 +1489,13 @@ void paintGL(){
 	m_imguiPanel->update();
 
 	if (ImGui::Button("SHADED"))
-		features = (1 << 0);
+		features = (1 << 0) | (1 << 1);
+	ImGui::SameLine(0, 1.0);
+	if (ImGui::Button("AMBIENT"))
+		features = (1 << 12);
+	ImGui::SameLine(0, 1.0);
+	if (ImGui::Button("DIFFUSE"))
+		features = (1 << 12);
 	ImGui::SameLine(0, 1.0);
 	if (ImGui::Button("WORLDSPACE"))
 		features = (1 << 13);
